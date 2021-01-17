@@ -1,0 +1,1 @@
+dotnet run -c Release -f net5.0 -- -f '*'
