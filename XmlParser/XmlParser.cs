@@ -1,12 +1,14 @@
 ﻿#nullable enable
+//#define CONSOLE_DEBUG
 //#define CREATE_ELEMENTS
 using System;
+using System.Collections.Generic;
 
 namespace XmlParser
 {
     public static class XmlParser
     {
-        private static ReadOnlySpan<char> SplitChars => new[] {' ', '\t', '\n', '\r'};
+        public static char[] SplitChars = new[] {' ', '\t', '\n', '\r'};
 
         public const string UriString = "http://www.w3.org/2000/svg";
 
@@ -17,7 +19,7 @@ namespace XmlParser
             var root = default(Element);
             var element = default(Element);
 #endif
-            var splitChars = SplitChars;
+            var splitChars = SplitChars.AsSpan();
 
             while (true)
             {
@@ -34,11 +36,13 @@ namespace XmlParser
                 var isComment = span.Length >= start + 4 && span[start + 1] == '!' && span[start + 2] == '-' && span[start + 3] == '-';
                 if (isComment)
                 {
-                    //var commentStart = start + 4;
                     var commentEnd = span.IndexOf("-->".AsSpan()) + 3;
-                    //var comment = span.Slice(commentStart, commentEnd - commentStart - 3);
-                    //Console.WriteLine($"[Comment]");
-                    //Console.WriteLine($"{comment.ToString()}");
+#if CONSOLE_DEBUG
+                    var commentStart = start + 4;
+                    var comment = span.Slice(commentStart, commentEnd - commentStart - 3);
+                    Console.WriteLine($"[Comment]");
+                    Console.WriteLine($"{comment.ToString()}");
+#endif
                     span = span.Slice(commentEnd);
                     continue;
                 }
@@ -60,7 +64,9 @@ namespace XmlParser
 
                 if (!isEnd)
                 {
-                    //Console.WriteLine($"<Element> '{elementName.ToString()}' {(hasAttributes ? "HasAttributes" : "")}");
+#if CONSOLE_DEBUG
+                    Console.WriteLine($"<Element> '{elementName.ToString()}' {(hasAttributes ? "HasAttributes" : "")}");
+#endif
 #if CREATE_ELEMENTS
                     element = new Element()
                     {
@@ -106,9 +112,9 @@ namespace XmlParser
                 {
                     var endAttributes = span.IndexOf('>');
                     var attributes = span.Slice(splitIndex, endAttributes - splitIndex);
-                    //Console.WriteLine($"    <Attributes>");
-                    //Console.WriteLine($"{attributes.ToString()}");
-
+#if CONSOLE_DEBUG
+                    Console.WriteLine($"    <Attributes>");
+#endif
                     while (true)
                     {
                         var attributeSplitIndex = attributes.IndexOf('=');
@@ -137,8 +143,9 @@ namespace XmlParser
                             break;
                         }
                         var attributeValue = attributes.Slice(0, attributeEndValueIndex1 >= 0 ? attributeEndValueIndex1 : attributeEndValueIndex2);
-
-                        //Console.WriteLine($"    [\"{attributeKey.Trim().ToString()}\"] = \"{attributeValue.ToString()}\"");
+#if CONSOLE_DEBUG
+                        Console.WriteLine($"    [\"{attributeKey.Trim().ToString()}\"] = \"{attributeValue.ToString()}\"");
+#endif
 #if CREATE_ELEMENTS
                         element?.AddAttribute(attributeKey.Trim().ToString(), attributeValue.ToString());
 #endif
@@ -156,7 +163,9 @@ namespace XmlParser
 
                 if (isEnd)
                 {
-                    //Console.WriteLine($"<EndElement> '{elementName.ToString()}");
+#if CONSOLE_DEBUG
+                    Console.WriteLine($"<EndElement> '{elementName.ToString()}");
+#endif
                     var endElement = span.IndexOf('>');
                     var lastIndex = endElement + 1;
                     span = span.Slice(lastIndex);

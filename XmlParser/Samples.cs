@@ -2,6 +2,8 @@
 {
     public static class Samples
     {
+      public static string Empty = @"<svg xmlns='http://www.w3.org/2000/svg'></svg>";
+
       public static string struct_svg_03_f = @"
 <svg id=""svg-root"" width=""100%"" height=""100%""
   viewBox=""0 0 480 360"" xmlns=""http://www.w3.org/2000/svg""
