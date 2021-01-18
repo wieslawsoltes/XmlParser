@@ -11,7 +11,8 @@ namespace XmlParser
         public const char TagStart = '<';
         public const char TagEnd = '>';
         public const char TagEndSlash = '/';
-        public const char ProcessingInstruction = '?';
+        public const char QuestionMark = '?';
+        public const char ExclamationMark = '!';
         public const char AttributeSeparator = '=';
         public const char DelimiterApostrophe = '\'';
         public const char DelimiterQuotationMark = '\"';
@@ -50,22 +51,21 @@ namespace XmlParser
                 }
                 var firstChar = span[start + 1];
 
-                // Processing Instruction
 #if true
-                if (spanLength >= start + 1 && firstChar == ProcessingInstruction)
+                if (spanLength >= start + 1 && (firstChar == QuestionMark || firstChar == ExclamationMark))
                 {
-                    var instructionEnd = span.IndexOf(TagEnd);
-                    if (instructionEnd < 0)
+                    var tagEndIndex = span.IndexOf(TagEnd);
+                    if (tagEndIndex < 0)
                     {
                         // ERROR
                         break;
                     }
 #if CONSOLE_DEBUG
-                    var instruction = span.Slice(start + 2, instructionEnd - 3 - start);
-                    Console.WriteLine($"{new string(' ', indent)}<ProcessingInstruction>");
-                    Console.WriteLine($"{new string(' ', indent)}{instruction.ToString()}");
+                    var content = span.Slice(start + 2, tagEndIndex - 3 - start);
+                    Console.WriteLine($"{new string(' ', indent)}<>");
+                    Console.WriteLine($"{new string(' ', indent)}{content.ToString()}");
 #endif
-                    span = span.Slice(instructionEnd + 1);
+                    span = span.Slice(tagEndIndex + 1);
                     if (span.Length <= 0)
                     {
                         break;
@@ -73,8 +73,9 @@ namespace XmlParser
                     continue;
                 }
 #endif
-                // Comment
 
+                // Comment
+#if false
                 var isComment = spanLength >= start + 4 && firstChar == CommentStart[1] && span[start + 2] == CommentStart[2] && span[start + 3] == CommentStart[3];
                 if (isComment)
                 {
@@ -88,6 +89,8 @@ namespace XmlParser
                     span = span.Slice(commentEnd);
                     continue;
                 }
+#endif
+                // Attributes
 
                 span = span.Slice(start + 1);
                 var splitIndex = span.IndexOfAny(whitespaceChars);
