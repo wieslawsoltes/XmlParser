@@ -62,6 +62,10 @@ namespace XmlParser
                 }
 
                 var endIndex = span.IndexOf(TagEnd);
+                if (endIndex < 0)
+                {
+                    break;
+                }
                 bool isSelfEnd = (endIndex > 0 && span[endIndex - 1] == TagEndSlash);
                 bool isEnd = span[0] == TagEndSlash;
                 bool hasAttributes = span[splitIndex - 1] != TagEnd;
@@ -87,6 +91,13 @@ namespace XmlParser
                         var contentStart = endIndex + 1;
                         var contentLength = nextIndex - endIndex - 1;
                         var content = span.Slice(contentStart, contentLength).Trim();
+#if CONSOLE_DEBUG
+                        if (content.Length > 0)
+                        {
+                            Console.WriteLine($"<Content>");
+                            Console.WriteLine($"    '{content.ToString()}'");
+                        }
+#endif
 #if CREATE_ELEMENTS
                         if (content.Length > 0)
                         {
@@ -117,10 +128,9 @@ namespace XmlParser
 #endif
                 if (hasAttributes)
                 {
-                    var endAttributes = endIndex; // span.IndexOf(TagEnd);
-                    var attributes = span.Slice(splitIndex, endAttributes - splitIndex);
+                    var attributes = span.Slice(splitIndex, endIndex - splitIndex);
 #if CONSOLE_DEBUG
-                    Console.WriteLine($"    <Attributes>");
+                    Console.WriteLine($"<Attributes>");
 #endif
                     while (true)
                     {
@@ -159,8 +169,7 @@ namespace XmlParser
                         attributes = attributes.Slice(attributeEndValueIndex1 >= 0 ? attributeEndValueIndex1 + 1 : attributeEndValueIndex2 + 1);
                     }
 
-                    var lastIndex = endAttributes + 1;
-                    span = span.Slice(lastIndex);
+                    span = span.Slice(endIndex + 1);
                     if (span.Length == 0)
                     {
                         break;
@@ -174,8 +183,7 @@ namespace XmlParser
                     Console.WriteLine($"<EndElement> '{elementName.ToString()}");
 #endif
                     var endElement = span.IndexOf(TagEnd);
-                    var lastIndex = endElement + 1;
-                    span = span.Slice(lastIndex);
+                    span = span.Slice(endElement + 1);
                     if (span.Length == 0)
                     {
                         break;
