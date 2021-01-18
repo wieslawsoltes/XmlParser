@@ -8,15 +8,15 @@ namespace XmlParser
 {
     public static class XmlParser
     {
-        public static char[] SplitChars = new[] {' ', '\t', '\n', '\r'};
         public const char TagStart = '<';
         public const char TagEnd = '>';
         public const char TagEndSlash = '/';
         public const char AttributeSeparator = '=';
         public const char DelimiterApostrophe = '\'';
         public const char DelimiterQuotationMark = '\"';
-        public static char[] CommentStart = new[] {'<', '!', '-', '-'};
-        public static char[] CommentEnd = new[] {'-', '-', '>'};
+        public readonly static char[] CommentStart = new[] {'<', '!', '-', '-'};
+        public readonly static char[] CommentEnd = new[] {'-', '-', '>'};
+        public readonly static char[] WhitespaceChars = new[] {' ', '\t', '\n', '\r'};
 
         public const string UriString = "http://www.w3.org/2000/svg";
 
@@ -27,7 +27,7 @@ namespace XmlParser
             var root = default(Element);
             var element = default(Element);
 #endif
-            var splitChars = SplitChars.AsSpan();
+            var whitespaceChars = WhitespaceChars.AsSpan();
 
             while (true)
             {
@@ -56,7 +56,7 @@ namespace XmlParser
                 }
     
                 span = span.Slice(start + 1);
-                var splitIndex = span.IndexOfAny(splitChars);
+                var splitIndex = span.IndexOfAny(whitespaceChars);
                 if (splitIndex <= 0)
                 {
                     break;
