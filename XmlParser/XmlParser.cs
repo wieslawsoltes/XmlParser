@@ -194,7 +194,7 @@ namespace XmlParser
 #if CONSOLE_DEBUG
                     if (isEnd)
                     {
-                        Console.WriteLine($"{new string(' ', indent)}<EndElement> '{elementName.ToString()}");
+                        Console.WriteLine($"{new string(' ', indent)}<EndElement> '{elementName.ToString()}'");
                     }
 #endif
                     var tagEndIndex = span.IndexOf(TagEnd);
