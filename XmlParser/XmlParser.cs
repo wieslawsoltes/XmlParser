@@ -8,14 +8,14 @@ namespace XmlParser
 {
     public static class XmlParser
     {
-        public const char TagStart = '<';
-        public const char TagEnd = '>';
-        public const char TagEndSlash = '/';
+        public const char LessThanSign = '<';
+        public const char GreaterThanSign = '>';
+        public const char Apostrophe = '\'';
+        public const char QuotationMark = '\"';
+        public const char Solidus = '/';
         public const char QuestionMark = '?';
         public const char ExclamationMark = '!';
-        public const char AttributeSeparator = '=';
-        public const char DelimiterApostrophe = '\'';
-        public const char DelimiterQuotationMark = '\"';
+        public const char EqualsSign = '=';
         public readonly static char[] CommentStart = new[] {'<', '!', '-', '-'};
         public readonly static char[] CommentEnd = new[] {'-', '-', '>'};
         public readonly static char[] WhitespaceChars = new[] {' ', '\t', '\n', '\r'};
@@ -38,7 +38,7 @@ namespace XmlParser
             {
                 // Next Tag
 
-                var start = span.IndexOf(TagStart);
+                var start = span.IndexOf(LessThanSign);
                 if (start < 0)
                 {
                     break;
@@ -54,7 +54,7 @@ namespace XmlParser
 #if true
                 if (spanLength >= start + 1 && (firstChar == QuestionMark || firstChar == ExclamationMark))
                 {
-                    var tagEndIndex = span.IndexOf(TagEnd);
+                    var tagEndIndex = span.IndexOf(GreaterThanSign);
                     if (tagEndIndex < 0)
                     {
                         // ERROR
@@ -99,14 +99,14 @@ namespace XmlParser
                     break;
                 }
 
-                var endIndex = span.IndexOf(TagEnd);
+                var endIndex = span.IndexOf(GreaterThanSign);
                 if (endIndex < 0)
                 {
                     break;
                 }
-                bool isSelfEnd = (endIndex > 0 && span[endIndex - 1] == TagEndSlash);
-                bool isEnd = span[0] == TagEndSlash;
-                bool hasAttributes = span[splitIndex - 1] != TagEnd;
+                bool isSelfEnd = (endIndex > 0 && span[endIndex - 1] == Solidus);
+                bool isEnd = span[0] == Solidus;
+                bool hasAttributes = span[splitIndex - 1] != GreaterThanSign;
                 var elementStart = isEnd && !isSelfEnd ? 1 : 0;
                 var elementEnd = hasAttributes ? splitIndex - elementStart : splitIndex - elementStart - 1;
                 var elementName = span.Slice(elementStart, elementEnd);
@@ -123,7 +123,7 @@ namespace XmlParser
                         ElementName = elementName.ToString()
                     };
 #endif
-                    var nextIndex = span.IndexOf(TagStart);
+                    var nextIndex = span.IndexOf(LessThanSign);
                     if (nextIndex > 0)
                     {
                         // Content
@@ -179,7 +179,7 @@ namespace XmlParser
 #endif
                     while (true)
                     {
-                        var attributeSplitIndex = attributes.IndexOf(AttributeSeparator);
+                        var attributeSplitIndex = attributes.IndexOf(EqualsSign);
                         if (attributeSplitIndex < 0)
                         {
                             // ERROR
@@ -189,16 +189,16 @@ namespace XmlParser
                         var attributeKey = attributes.Slice(0, attributeSplitIndex);
 
                         attributes = attributes.Slice(attributeSplitIndex + 1);
-                        var attributeStartValueIndex1 = attributes.IndexOf(DelimiterQuotationMark);
-                        var attributeStartValueIndex2 = attributes.IndexOf(DelimiterApostrophe);
+                        var attributeStartValueIndex1 = attributes.IndexOf(QuotationMark);
+                        var attributeStartValueIndex2 = attributes.IndexOf(Apostrophe);
                         if (attributeStartValueIndex1 < 0 && attributeStartValueIndex2 < 0)
                         {
                             // ERROR
                             break;
                         }
                         attributes = attributes.Slice(attributeStartValueIndex1 >= 0 ? attributeStartValueIndex1 + 1 : attributeStartValueIndex2 + 1);
-                        var attributeEndValueIndex1 = attributes.IndexOf(DelimiterQuotationMark);
-                        var attributeEndValueIndex2 = attributes.IndexOf(DelimiterApostrophe);
+                        var attributeEndValueIndex1 = attributes.IndexOf(QuotationMark);
+                        var attributeEndValueIndex2 = attributes.IndexOf(Apostrophe);
                         if (attributeEndValueIndex1 < 0 && attributeEndValueIndex2 < 0)
                         {
                             // ERROR
@@ -229,7 +229,7 @@ namespace XmlParser
                         Console.WriteLine($"{new string(' ', indent)}<EndElement> '{elementName.ToString()}'");
                     }
 #endif
-                    var tagEndIndex = span.IndexOf(TagEnd);
+                    var tagEndIndex = span.IndexOf(GreaterThanSign);
                     span = span.Slice(tagEndIndex + 1);
                     if (span.Length == 0)
                     {
