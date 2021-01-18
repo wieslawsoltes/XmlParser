@@ -21,6 +21,10 @@ namespace XmlParser
 
         public static void Parse(ReadOnlySpan<char> span)
         {
+#if CONSOLE_DEBUG
+            int indent = 0;
+            int indentSize = 4;
+#endif
 #if CREATE_ELEMENTS
             var elements = new Stack<Element>();
             var root = default(Element);
@@ -47,8 +51,8 @@ namespace XmlParser
 #if CONSOLE_DEBUG
                     var commentStart = start + 4;
                     var comment = span.Slice(commentStart, commentEnd - commentStart - 3);
-                    Console.WriteLine($"[Comment]");
-                    Console.WriteLine($"{comment.ToString()}");
+                    Console.WriteLine($"{new string(' ', indent)}<Comment>");
+                    Console.WriteLine($"{new string(' ', indent)}{comment.ToString()}");
 #endif
                     span = span.Slice(commentEnd);
                     continue;
@@ -76,7 +80,8 @@ namespace XmlParser
                 if (!isEnd)
                 {
 #if CONSOLE_DEBUG
-                    Console.WriteLine($"<Element> '{elementName.ToString()}' {(hasAttributes ? "HasAttributes" : "")}");
+                    Console.WriteLine($"{new string(' ', indent)}<Element> '{elementName.ToString()}'");
+                    indent += indentSize;
 #endif
 #if CREATE_ELEMENTS
                     element = new Element()
@@ -94,8 +99,8 @@ namespace XmlParser
 #if CONSOLE_DEBUG
                         if (content.Length > 0)
                         {
-                            Console.WriteLine($"<Content>");
-                            Console.WriteLine($"    '{content.ToString()}'");
+                            Console.WriteLine($"{new string(' ', indent)}<Content>");
+                            Console.WriteLine($"{new string(' ', indent)}'{content.ToString()}'");
                         }
 #endif
 #if CREATE_ELEMENTS
@@ -120,6 +125,12 @@ namespace XmlParser
                     elements.Push(element);
 #endif
                 }
+#if CONSOLE_DEBUG
+                if (isEnd || isSelfEnd)
+                {
+                    indent -= indentSize;
+                }
+#endif
 #if CREATE_ELEMENTS
                 if (isEnd || isSelfEnd)
                 {
@@ -130,7 +141,7 @@ namespace XmlParser
                 {
                     var attributes = span.Slice(splitIndex, endIndex - splitIndex);
 #if CONSOLE_DEBUG
-                    Console.WriteLine($"<Attributes>");
+                    Console.WriteLine($"{new string(' ', indent)}<Attributes>");
 #endif
                     while (true)
                     {
@@ -161,7 +172,7 @@ namespace XmlParser
                         }
                         var attributeValue = attributes.Slice(0, attributeEndValueIndex1 >= 0 ? attributeEndValueIndex1 : attributeEndValueIndex2);
 #if CONSOLE_DEBUG
-                        Console.WriteLine($"    [\"{attributeKey.Trim().ToString()}\"] = \"{attributeValue.ToString()}\"");
+                        Console.WriteLine($"{new string(' ', indent)}[\"{attributeKey.Trim().ToString()}\"] = \"{attributeValue.ToString()}\"");
 #endif
 #if CREATE_ELEMENTS
                         element?.AddAttribute(attributeKey.Trim().ToString(), attributeValue.ToString());
@@ -177,13 +188,17 @@ namespace XmlParser
                     continue;
                 }
 
-                if (isEnd)
+                //if (isEnd)
+                else
                 {
 #if CONSOLE_DEBUG
-                    Console.WriteLine($"<EndElement> '{elementName.ToString()}");
+                    if (isEnd)
+                    {
+                        Console.WriteLine($"{new string(' ', indent)}<EndElement> '{elementName.ToString()}");
+                    }
 #endif
-                    var endElement = span.IndexOf(TagEnd);
-                    span = span.Slice(endElement + 1);
+                    var tagEndIndex = span.IndexOf(TagEnd);
+                    span = span.Slice(tagEndIndex + 1);
                     if (span.Length == 0)
                     {
                         break;
