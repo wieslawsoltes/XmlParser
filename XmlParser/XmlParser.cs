@@ -57,7 +57,7 @@ namespace XmlParser
                     span = span.Slice(commentEnd);
                     continue;
                 }
-    
+
                 span = span.Slice(start + 1);
                 var splitIndex = span.IndexOfAny(whitespaceChars);
                 if (splitIndex <= 0)
@@ -151,7 +151,7 @@ namespace XmlParser
                             // ERROR
                             break;
                         }
-                        
+
                         var attributeKey = attributes.Slice(0, attributeSplitIndex);
 
                         attributes = attributes.Slice(attributeSplitIndex + 1);
