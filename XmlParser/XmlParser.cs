@@ -17,7 +17,6 @@ namespace XmlParser
         public readonly static char[] CommentStart = new[] {'<', '!', '-', '-'};
         public readonly static char[] CommentEnd = new[] {'-', '-', '>'};
         public readonly static char[] WhitespaceChars = new[] {' ', '\t', '\n', '\r'};
-
         public const string UriString = "http://www.w3.org/2000/svg";
 
         public static void Parse(ReadOnlySpan<char> span)
