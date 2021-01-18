@@ -1,5 +1,6 @@
 using System.Collections.Generic;
 using BenchmarkDotNet.Attributes;
+using XmlParser.Factory;
 
 namespace XmlParser.Benchmark
 {
@@ -8,13 +9,13 @@ namespace XmlParser.Benchmark
         [Benchmark]
         public void Element_new()
         {
-            var element = new Element();
+            var element = new XmlElement();
         }
 
         [Benchmark]
         public void Elements_new()
         {
-            var elements = new Stack<Element>();
+            var elements = new Stack<XmlElement>();
         }
     }
 }

@@ -2,37 +2,30 @@
 //#define CONSOLE_DEBUG
 //#define CONSOLE_DEBUG_UNSUPPORTED
 //#define CONSOLE_DEBUG_ATTRIBUTES
-//#define CREATE_ELEMENTS
 using System;
-using System.Collections.Generic;
+using XmlParser.Factory;
 
 namespace XmlParser
 {
     public static class XmlParser
     {
-        public const char LessThanSign = '<';
-        public const char GreaterThanSign = '>';
-        public const char Apostrophe = '\'';
-        public const char QuotationMark = '\"';
-        public const char Solidus = '/';
-        public const char QuestionMark = '?';
-        public const char ExclamationMark = '!';
-        public const char EqualsSign = '=';
-        public readonly static char[] CommentStart = new[] {'<', '!', '-', '-'};
-        public readonly static char[] CommentEnd = new[] {'-', '-', '>'};
-        public readonly static char[] WhitespaceChars = new[] {' ', '\t', '\n', '\r'};
-        public const string UriString = "http://www.w3.org/2000/svg";
+        private const char LessThanSign = '<';
+        private const char GreaterThanSign = '>';
+        private const char Apostrophe = '\'';
+        private const char QuotationMark = '\"';
+        private const char Solidus = '/';
+        private const char QuestionMark = '?';
+        private const char ExclamationMark = '!';
+        private const char EqualsSign = '=';
+        private static readonly char[] WhitespaceChars = new[] {' ', '\t', '\n', '\r'};
+        // private static readonly char[] CommentStart = new[] {'<', '!', '-', '-'};
+        // private static readonly char[] CommentEnd = new[] {'-', '-', '>'};
 
-        public static void Parse(ReadOnlySpan<char> span)
+        public static void Parse(ReadOnlySpan<char> span, IXmlFactory? factory = null)
         {
 #if CONSOLE_DEBUG
             int indent = 0;
             int indentSize = 4;
-#endif
-#if CREATE_ELEMENTS
-            var elements = new Stack<Element>();
-            var root = default(Element);
-            var element = default(Element);
 #endif
             var whitespaceChars = WhitespaceChars.AsSpan();
 
@@ -106,10 +99,9 @@ namespace XmlParser
                 {
                     break;
                 }
-                bool isSelfEnd = (endIndex > 0 && span[endIndex - 1] == Solidus);
-                bool isEnd = span[0] == Solidus;
-                bool hasAttributes = span[splitIndex - 1] != GreaterThanSign;
-
+                var isSelfEnd = (endIndex > 0 && span[endIndex - 1] == Solidus);
+                var isEnd = span[0] == Solidus;
+                var hasAttributes = span[splitIndex - 1] != GreaterThanSign;
                 var endOffset = isEnd && !isSelfEnd ? 1 : 0;
                 var elementEnd = hasAttributes ? 
                                  splitIndex - endOffset 
@@ -123,16 +115,13 @@ namespace XmlParser
                     Console.WriteLine($"{new string(' ', indent)}<Element> '{elementName.ToString()}' Attributes={hasAttributes}, {endOffset}:{elementEnd}");
                     indent += indentSize;
 #endif
-#if CREATE_ELEMENTS
-                    element = new Element()
-                    {
-                        ElementName = elementName.ToString()
-                    };
-#endif
+                    factory?.PushElement(elementName);
+
+                    // Content
+
                     var nextIndex = span.IndexOf(LessThanSign);
                     if (nextIndex > 0)
                     {
-                        // Content
                         var contentStart = endIndex + 1;
                         var contentLength = nextIndex - endIndex - 1;
                         var content = span.Slice(contentStart, contentLength).Trim();
@@ -143,27 +132,11 @@ namespace XmlParser
                             Console.WriteLine($"{new string(' ', indent)}'{content.ToString()}'");
                         }
 #endif
-#if CREATE_ELEMENTS
                         if (content.Length > 0)
                         {
-                            element.Content = content.ToString();
+                            factory?.AddElementContent(content);
                         }
-#endif
                     }
-#if CREATE_ELEMENTS
-                    if (elements.Count == 0)
-                    {
-                        root = element;
-                    }
-
-                    if (elements.Count > 0)
-                    {
-                        var parent = elements.Peek();
-                        parent.AddChild(element);
-                    }
-
-                    elements.Push(element);
-#endif
                 }
 #if CONSOLE_DEBUG
                 if (isEnd || isSelfEnd)
@@ -171,12 +144,11 @@ namespace XmlParser
                     indent -= indentSize;
                 }
 #endif
-#if CREATE_ELEMENTS
                 if (isEnd || isSelfEnd)
                 {
-                    element = elements.Pop();
+                    factory?.PopElement();
                 }
-#endif
+
                 if (hasAttributes)
                 {
                     var attributes = span.Slice(splitIndex, endIndex - splitIndex);
@@ -226,9 +198,8 @@ if (elementName.SequenceEqual("path".AsSpan()))
 #if CONSOLE_DEBUG_ATTRIBUTES
                         Console.WriteLine($"{new string(' ', indent)}[\"{attributeKey.Trim().ToString()}\"] = \"{attributeValue.ToString()}\"");
 #endif
-#if CREATE_ELEMENTS
-                        element?.AddAttribute(attributeKey.Trim().ToString(), attributeValue.ToString());
-#endif
+                        factory?.AddElementAttribute(attributeKey.Trim().ToString(), attributeValue.ToString());
+
                         attributes = attributes.Slice(attributeEndValueIndex1 >= 0 ? attributeEndValueIndex1 + 1 : attributeEndValueIndex2 + 1);
                     }
 
@@ -237,7 +208,6 @@ if (elementName.SequenceEqual("path".AsSpan()))
                     {
                         break;
                     }
-                    continue;
                 }
                 else
                 {

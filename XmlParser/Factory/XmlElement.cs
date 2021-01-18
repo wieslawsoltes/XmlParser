@@ -1,30 +1,24 @@
 ﻿#nullable enable
 using System.Collections.Generic;
 
-namespace XmlParser
+namespace XmlParser.Factory
 {
-    public class Element
+    public class XmlElement
     {
         public string? ElementName { get; set; }
-        public List<Element>? Children { get; set; }
+        public List<XmlElement>? Children { get; set; }
         public Dictionary<string, string>? Attributes { get; set; }
         public string? Content { get; set; }
 
-        public void AddChild(Element child)
+        public void AddChild(XmlElement child)
         {
-            if (Children == null)
-            {
-                Children = new List<Element>();
-            }
+            Children ??= new List<XmlElement>();
             Children.Add(child);
         }
 
         public void AddAttribute(string key, string value)
         {
-            if (Attributes == null)
-            {
-                Attributes = new Dictionary<string, string>();
-            }
+            Attributes ??= new Dictionary<string, string>();
             Attributes[key] = value;
         }
 

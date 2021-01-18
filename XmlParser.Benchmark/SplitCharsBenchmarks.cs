@@ -6,9 +6,9 @@ namespace XmlParser.Benchmark
 {
     public class SplitCharsBenchmarks
     {
-        public static ReadOnlySpan<char> SplitCharsReadOnlySpan => new[] {' ', '\t', '\n', '\r'};
+        private static ReadOnlySpan<char> SplitCharsReadOnlySpan => new[] {' ', '\t', '\n', '\r'};
 
-        public static char[] SplitCharsArray = new[] {' ', '\t', '\n', '\r'};
+        private static readonly char[] SplitCharsArray = new[] {' ', '\t', '\n', '\r'};
 
         [Benchmark(Baseline = true)]
         public void SplitChars_Array_AsSpan()
