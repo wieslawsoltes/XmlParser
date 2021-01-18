@@ -10,7 +10,7 @@ namespace XmlParser.Benchmark
 
         public static char[] SplitCharsArray = new[] {' ', '\t', '\n', '\r'};
 
-        [Benchmark]
+        [Benchmark(Baseline = true)]
         public void SplitChars_Array_AsSpan()
         {
            var splitChars = SplitCharsArray.AsSpan();

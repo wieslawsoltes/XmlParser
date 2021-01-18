@@ -1,6 +1,6 @@
 ﻿#nullable enable
 //#define CONSOLE_DEBUG
-//#define CREATE_ELEMENTS
+#define CREATE_ELEMENTS
 using System;
 using System.Collections.Generic;
 
