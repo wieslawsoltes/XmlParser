@@ -187,8 +187,6 @@ namespace XmlParser
                     }
                     continue;
                 }
-
-                //if (isEnd)
                 else
                 {
 #if CONSOLE_DEBUG
