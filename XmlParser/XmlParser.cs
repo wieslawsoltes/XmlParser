@@ -11,6 +11,7 @@ namespace XmlParser
         public const char TagStart = '<';
         public const char TagEnd = '>';
         public const char TagEndSlash = '/';
+        public const char ProcessingInstruction = '?';
         public const char AttributeSeparator = '=';
         public const char DelimiterApostrophe = '\'';
         public const char DelimiterQuotationMark = '\"';
@@ -40,6 +41,30 @@ namespace XmlParser
                 if (start < 0)
                 {
                     break;
+                }
+
+                // Processing Instruction
+
+                if (span.Length >= start + 1 && span[start + 1] == ProcessingInstruction)
+                {
+                    span = span.Slice(start + 1);
+                    var instructionEnd = span.IndexOf(TagEnd);
+                    if (instructionEnd < 0)
+                    {
+                        // ERROR
+                        break;
+                    }
+#if CONSOLE_DEBUG
+                    var instruction = span.Slice(start + 1, instructionEnd - 2 - start);
+                    Console.WriteLine($"{new string(' ', indent)}<ProcessingInstruction>");
+                    Console.WriteLine($"{new string(' ', indent)}{instruction.ToString()}");
+#endif
+                    span = span.Slice(instructionEnd + 1);
+                    if (span.Length <= 0)
+                    {
+                        break;
+                    }
+                    continue;
                 }
 
                 // Comment
