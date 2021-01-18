@@ -211,6 +211,18 @@ namespace XmlParser
                             break;
                         }
                         var attributeValue = attributes.Slice(0, attributeEndValueIndex1 >= 0 ? attributeEndValueIndex1 : attributeEndValueIndex2);
+
+// Filter Attributes
+/*
+if (elementName.SequenceEqual("path".AsSpan()))
+{
+    if (attributeKey.Trim().SequenceEqual("d".AsSpan()))
+    {
+        Console.WriteLine($"d={attributeValue.ToString()}");
+    }
+}
+*/
+
 #if CONSOLE_DEBUG_ATTRIBUTES
                         Console.WriteLine($"{new string(' ', indent)}[\"{attributeKey.Trim().ToString()}\"] = \"{attributeValue.ToString()}\"");
 #endif
