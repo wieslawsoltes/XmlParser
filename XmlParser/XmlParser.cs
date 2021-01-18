@@ -61,9 +61,6 @@ namespace XmlParser
                             break;
                         }
 
-                        var commentStart = startIndex + 4;
-                        var comment = span.Slice(commentStart, commentEnd - commentStart - 3);
-  
                         span = span.Slice(commentEnd);
                         if (span.Length <= 0)
                         {
@@ -81,10 +78,6 @@ namespace XmlParser
                         {
                             break;
                         }
-
-                        var contentStart = startIndex + 2;
-                        var contentLength = endInstruction - 3 - startIndex;
-                        var instruction = span.Slice(contentStart, contentLength);
 
                         span = span.Slice(endInstruction + 1);
                         if (span.Length <= 0)
@@ -205,7 +198,15 @@ namespace XmlParser
 
                 if (isEnd || isSelfEnd)
                 {
-                    factory?.PopElement();
+                    try
+                    {
+                        factory?.PopElement();
+                    }
+                    catch (Exception e)
+                    {
+                        Console.WriteLine(e);
+                        throw;
+                    }
                 }
 
                 // Attributes
