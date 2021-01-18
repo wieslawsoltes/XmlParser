@@ -1,5 +1,7 @@
 ﻿#nullable enable
 //#define CONSOLE_DEBUG
+//#define CONSOLE_DEBUG_UNSUPPORTED
+//#define CONSOLE_DEBUG_ATTRIBUTES
 //#define CREATE_ELEMENTS
 using System;
 using System.Collections.Generic;
@@ -60,7 +62,7 @@ namespace XmlParser
                         // ERROR
                         break;
                     }
-#if CONSOLE_DEBUG
+#if CONSOLE_DEBUG_UNSUPPORTED
                     var content = span.Slice(start + 2, tagEndIndex - 3 - start);
                     Console.WriteLine($"{new string(' ', indent)}<>");
                     Console.WriteLine($"{new string(' ', indent)}{content.ToString()}");
@@ -107,14 +109,18 @@ namespace XmlParser
                 bool isSelfEnd = (endIndex > 0 && span[endIndex - 1] == Solidus);
                 bool isEnd = span[0] == Solidus;
                 bool hasAttributes = span[splitIndex - 1] != GreaterThanSign;
-                var elementStart = isEnd && !isSelfEnd ? 1 : 0;
-                var elementEnd = hasAttributes ? splitIndex - elementStart : splitIndex - elementStart - 1;
-                var elementName = span.Slice(elementStart, elementEnd);
+
+                var endOffset = isEnd && !isSelfEnd ? 1 : 0;
+                var elementEnd = hasAttributes ? 
+                                 splitIndex - endOffset 
+                                 : (splitIndex > endIndex ? endIndex - endOffset : splitIndex - endOffset - 1);
+
+                var elementName = span.Slice(endOffset, elementEnd);
 
                 if (!isEnd)
                 {
 #if CONSOLE_DEBUG
-                    Console.WriteLine($"{new string(' ', indent)}<Element> '{elementName.ToString()}'");
+                    Console.WriteLine($"{new string(' ', indent)}<Element> '{elementName.ToString()}' Attributes={hasAttributes}, {endOffset}:{elementEnd}");
                     indent += indentSize;
 #endif
 #if CREATE_ELEMENTS
@@ -174,7 +180,7 @@ namespace XmlParser
                 if (hasAttributes)
                 {
                     var attributes = span.Slice(splitIndex, endIndex - splitIndex);
-#if CONSOLE_DEBUG
+#if CONSOLE_DEBUG_ATTRIBUTES
                     Console.WriteLine($"{new string(' ', indent)}<Attributes>");
 #endif
                     while (true)
@@ -205,7 +211,7 @@ namespace XmlParser
                             break;
                         }
                         var attributeValue = attributes.Slice(0, attributeEndValueIndex1 >= 0 ? attributeEndValueIndex1 : attributeEndValueIndex2);
-#if CONSOLE_DEBUG
+#if CONSOLE_DEBUG_ATTRIBUTES
                         Console.WriteLine($"{new string(' ', indent)}[\"{attributeKey.Trim().ToString()}\"] = \"{attributeValue.ToString()}\"");
 #endif
 #if CREATE_ELEMENTS
