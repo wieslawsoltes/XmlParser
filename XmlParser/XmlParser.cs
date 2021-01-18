@@ -43,11 +43,17 @@ namespace XmlParser
                     break;
                 }
 
-                // Processing Instruction
-
-                if (span.Length >= start + 1 && span[start + 1] == ProcessingInstruction)
+                var spanLength = span.Length;
+                if (spanLength < 1)
                 {
-                    span = span.Slice(start + 1);
+                    break;
+                }
+                var firstChar = span[start + 1];
+
+                // Processing Instruction
+#if true
+                if (spanLength >= start + 1 && firstChar == ProcessingInstruction)
+                {
                     var instructionEnd = span.IndexOf(TagEnd);
                     if (instructionEnd < 0)
                     {
@@ -55,7 +61,7 @@ namespace XmlParser
                         break;
                     }
 #if CONSOLE_DEBUG
-                    var instruction = span.Slice(start + 1, instructionEnd - 2 - start);
+                    var instruction = span.Slice(start + 2, instructionEnd - 3 - start);
                     Console.WriteLine($"{new string(' ', indent)}<ProcessingInstruction>");
                     Console.WriteLine($"{new string(' ', indent)}{instruction.ToString()}");
 #endif
@@ -66,10 +72,10 @@ namespace XmlParser
                     }
                     continue;
                 }
-
+#endif
                 // Comment
 
-                var isComment = span.Length >= start + 4 && span[start + 1] == CommentStart[1] && span[start + 2] == CommentStart[2] && span[start + 3] == CommentStart[3];
+                var isComment = spanLength >= start + 4 && firstChar == CommentStart[1] && span[start + 2] == CommentStart[2] && span[start + 3] == CommentStart[3];
                 if (isComment)
                 {
                     var commentEnd = span.IndexOf(CommentEnd.AsSpan()) + 3;
