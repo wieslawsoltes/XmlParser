@@ -1,7 +1,7 @@
 ﻿#nullable enable
 using System;
 
-namespace XmlParser.Factory
+namespace XmlParser
 {
     public interface IXmlFactory
     {

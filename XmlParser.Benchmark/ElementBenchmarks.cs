@@ -1,7 +1,5 @@
 using System.Collections.Generic;
 using BenchmarkDotNet.Attributes;
-using XmlParser.Factory;
-
 namespace XmlParser.Benchmark
 {
     public class ElementBenchmarks

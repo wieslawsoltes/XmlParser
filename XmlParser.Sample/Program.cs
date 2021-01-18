@@ -2,9 +2,8 @@
 using System;
 using System.Diagnostics;
 using System.IO;
-using XmlParser.Factory;
 
-namespace XmlParser
+namespace XmlParser.Sample
 {
     internal static class Program
     {

@@ -3,7 +3,6 @@
 //#define CONSOLE_DEBUG_UNSUPPORTED
 //#define CONSOLE_DEBUG_ATTRIBUTES
 using System;
-using XmlParser.Factory;
 
 namespace XmlParser
 {

@@ -1,7 +1,7 @@
 ﻿#nullable enable
 using System.Collections.Generic;
 
-namespace XmlParser.Factory
+namespace XmlParser
 {
     public class XmlElement
     {

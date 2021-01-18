@@ -1,4 +1,4 @@
-﻿namespace XmlParser
+﻿namespace XmlParser.Sample
 {
     public static class Samples
     {

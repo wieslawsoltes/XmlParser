@@ -1,7 +1,6 @@
 ﻿#nullable enable
 using System.IO;
 using System.Xml;
-using XmlParser.Factory;
 
 namespace XmlParser
 {

@@ -1,6 +1,6 @@
 using System;
 using BenchmarkDotNet.Attributes;
-using XmlParser.Factory;
+using XmlParser.Sample;
 
 namespace XmlParser.Benchmark
 {
