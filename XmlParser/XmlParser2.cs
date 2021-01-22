@@ -14,17 +14,15 @@ namespace XmlParser
 
             for (var position = 0; position < span.Length; position++)
             {
-                if (span[position] == '\r')
+                switch (span[position])
                 {
-                    column = 1;
-                    continue;
-                }
-
-                if (span[position] == '\n')
-                {
-                    column = 1;
-                    line++;
-                    continue;
+                    case '\r':
+                        column = 1;
+                        continue;
+                    case '\n':
+                        column = 1;
+                        line++;
+                        continue;
                 }
 
                 // Tag Start
@@ -46,20 +44,20 @@ namespace XmlParser
 
                     for (position += 1; position < span.Length; position++)
                     {
-                        if (span[position] == '\r')
+                        switch (span[position])
                         {
-                            lastWhitespace = position;
-                            column = 1;
-                        }
-                        else if (span[position] == '\n')
-                        {
-                            lastWhitespace = position;
-                            column = 1;
-                            line++;
-                        }
-                        else
-                        {
-                            column++;
+                            case '\r':
+                                lastWhitespace = position;
+                                column = 1;
+                                break;
+                            case '\n':
+                                lastWhitespace = position;
+                                column = 1;
+                                line++;
+                                break;
+                            default:
+                                column++;
+                                break;
                         }
 
                         // Comment End
@@ -132,36 +130,38 @@ namespace XmlParser
                         }
 
                         // Tag End
-                        if (span[position] == '>')
+                        if (span[position] != '>')
                         {
-                            if (end < 0)
-                            {
-                                end = position;
-                            }
-
-                            if (slash == start + 1)
-                            {
-                                // </tag>
-                                var e = span.Slice(start + 2, end - start - 2);
-                                level--;
-                                //Console.WriteLine($"[1] {new string(' ', level * 2)}'</{e.ToString()}>' {startLine}:{startColumn}");
-                            }
-                            else if (slash == position - 1)
-                            {
-                                // <tag/>
-                                var e = span.Slice(start + 1, end - start - 1);
-                                //Console.WriteLine($"[2] {new string(' ', level * 2)}'<{e.ToString()}/>' {startLine}:{startColumn}");
-                            }
-                            else
-                            {
-                                // <tag>
-                                var e = span.Slice(start + 1, end - start - 1);
-                                //Console.WriteLine($"[3] {new string(' ', level * 2)}'<{e.ToString()}>' {startLine}:{startColumn}");
-                                level++;
-                            }
-
-                            break;
+                            continue;
                         }
+ 
+                        if (end < 0)
+                        {
+                            end = position;
+                        }
+
+                        if (slash == start + 1)
+                        {
+                            // </tag>
+                            var e = span.Slice(start + 2, end - start - 2);
+                            level--;
+                            //Console.WriteLine($"[1] {new string(' ', level * 2)}'</{e.ToString()}>' {startLine}:{startColumn}");
+                        }
+                        else if (slash == position - 1)
+                        {
+                            // <tag/>
+                            var e = span.Slice(start + 1, end - start - 1);
+                            //Console.WriteLine($"[2] {new string(' ', level * 2)}'<{e.ToString()}/>' {startLine}:{startColumn}");
+                        }
+                        else
+                        {
+                            // <tag>
+                            var e = span.Slice(start + 1, end - start - 1);
+                            //Console.WriteLine($"[3] {new string(' ', level * 2)}'<{e.ToString()}>' {startLine}:{startColumn}");
+                            level++;
+                        }
+
+                        break;
                     }
                 }
 
