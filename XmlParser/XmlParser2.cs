@@ -12,20 +12,16 @@ namespace XmlParser
             var column = 1;
             var skipComment = false;
 
-            for (int position = 0; position < span.Length; position++)
+            for (var position = 0; position < span.Length; position++)
             {
-                var lastWhitespace = -1;
-
                 if (span[position] == '\r')
                 {
-                    lastWhitespace = position;
                     column = 1;
                     continue;
                 }
 
                 if (span[position] == '\n')
                 {
-                    lastWhitespace = position;
                     column = 1;
                     line++;
                     continue;
@@ -41,13 +37,13 @@ namespace XmlParser
                     var slash = -1;
                     var skipValue = false;
                     var skipValueStart = -1;
-                    lastWhitespace = -1;
+                    var lastWhitespace = -1;
 
                     if (position + 1 >= span.Length)
                     {
                         break;
                     }
-                    
+
                     for (position += 1; position < span.Length; position++)
                     {
                         if (span[position] == '\r')
