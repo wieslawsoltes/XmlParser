@@ -40,6 +40,7 @@ namespace XmlParser
                     var skipValue = false;
                     var skipValueStart = -1;
                     var skipValueEnd = -1;
+                    lastWhitespace = -1;
 
                     if (position + 1 >= span.Length)
                     {
@@ -105,7 +106,14 @@ namespace XmlParser
                                 skipValue = false;
 
                                 var value = span.Slice(skipValueStart, skipValueEnd - skipValueStart + 1);
-                                // Console.WriteLine($"{value.ToString()}");
+
+                                //Console.WriteLine($"{value.ToString()}");
+
+                                if (lastWhitespace >= 0 && span[skipValueStart - 1] == '=')
+                                {
+                                    var key = span.Slice(lastWhitespace + 1, skipValueStart - lastWhitespace - 2);
+                                    Console.WriteLine($"'{key.ToString()}'='{value.Slice(1, value.Length - 2).ToString()}'");
+                                }
                             }
                             else
                             {
