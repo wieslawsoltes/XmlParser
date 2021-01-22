@@ -59,8 +59,8 @@ namespace XmlParser.Sample
         private static void Main(string[] args)
         {
             {
-                //var path = @"c:\DOWNLOADS\GitHub-Forks\SVG\Tests\W3CTestSuite\svg\paths-data-02-t.svg";
-                var path = @"c:\DOWNLOADS\GitHub-Forks\WalletWasabi\WalletWasabi.Fluent\Views\NavBar\NavBar.axaml";
+                var path = @"c:\DOWNLOADS\GitHub-Forks\SVG\Tests\W3CTestSuite\svg\paths-data-02-t.svg";
+                //var path = @"c:\DOWNLOADS\GitHub-Forks\WalletWasabi\WalletWasabi.Fluent\Views\NavBar\NavBar.axaml";
                 var svg = File.ReadAllText(path);
                 var factory = new XmlFactory();
                 //XmlParser.Parse(svg.AsSpan(), factory);
