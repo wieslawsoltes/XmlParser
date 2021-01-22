@@ -11,17 +11,19 @@ namespace XmlParser
             var line = 1;
             var column = 1;
             var skipComment = false;
-            var lastWhitespace = -1;
 
             for (int position = 0; position < span.Length; position++)
             {
+                var lastWhitespace = -1;
+
                 if (span[position] == '\r')
                 {
                     lastWhitespace = position;
                     column = 1;
                     continue;
                 }
-                else if (span[position] == '\n')
+
+                if (span[position] == '\n')
                 {
                     lastWhitespace = position;
                     column = 1;
@@ -39,7 +41,6 @@ namespace XmlParser
                     var slash = -1;
                     var skipValue = false;
                     var skipValueStart = -1;
-                    var skipValueEnd = -1;
                     lastWhitespace = -1;
 
                     if (position + 1 >= span.Length)
@@ -102,23 +103,21 @@ namespace XmlParser
                         {
                             if (skipValue)
                             {
-                                skipValueEnd = position;
                                 skipValue = false;
 
-                                var value = span.Slice(skipValueStart, skipValueEnd - skipValueStart + 1);
+                                var value = span.Slice(skipValueStart, position - skipValueStart + 1);
 
                                 //Console.WriteLine($"{value.ToString()}");
 
                                 if (lastWhitespace >= 0 && span[skipValueStart - 1] == '=')
                                 {
                                     var key = span.Slice(lastWhitespace + 1, skipValueStart - lastWhitespace - 2);
-                                    Console.WriteLine($"'{key.ToString()}'='{value.Slice(1, value.Length - 2).ToString()}'");
+                                    //Console.WriteLine($"'{key.ToString()}'='{value.Slice(1, value.Length - 2).ToString()}'");
                                 }
                             }
                             else
                             {
                                 skipValueStart = position;
-                                skipValueEnd = -1;
                                 skipValue = true;
                                 continue;
                             }
@@ -153,19 +152,19 @@ namespace XmlParser
                                 // </tag>
                                 var e = span.Slice(start + 2, end - start - 2);
                                 level--;
-                                Console.WriteLine($"[1] {new string(' ', level * 2)}'</{e.ToString()}>' {startLine}:{startColumn}");
+                                //Console.WriteLine($"[1] {new string(' ', level * 2)}'</{e.ToString()}>' {startLine}:{startColumn}");
                             }
                             else if (slash == position - 1)
                             {
                                 // <tag/>
                                 var e = span.Slice(start + 1, end - start - 1);
-                                Console.WriteLine($"[2] {new string(' ', level * 2)}'<{e.ToString()}/>' {startLine}:{startColumn}");
+                                //Console.WriteLine($"[2] {new string(' ', level * 2)}'<{e.ToString()}/>' {startLine}:{startColumn}");
                             }
                             else
                             {
                                 // <tag>
                                 var e = span.Slice(start + 1, end - start - 1);
-                                Console.WriteLine($"[3] {new string(' ', level * 2)}'<{e.ToString()}>' {startLine}:{startColumn}");
+                                //Console.WriteLine($"[3] {new string(' ', level * 2)}'<{e.ToString()}>' {startLine}:{startColumn}");
                                 level++;
                             }
 
