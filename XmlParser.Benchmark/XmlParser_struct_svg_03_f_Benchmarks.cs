@@ -13,6 +13,12 @@ namespace XmlParser.Benchmark
         }
 
         [Benchmark]
+        public void XmlParser2_Parse()
+        {
+            XmlParser2.Parse(Samples.struct_svg_03_f.AsSpan());
+        }
+
+        [Benchmark]
         public void XmlTextReader_Parse()
         {
             XmlTextReaderParser.Parse(Samples.struct_svg_03_f);
