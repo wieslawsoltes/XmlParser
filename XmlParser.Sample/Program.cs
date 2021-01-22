@@ -58,6 +58,22 @@ namespace XmlParser.Sample
 
         private static void Main(string[] args)
         {
+            {
+                //var path = @"c:\DOWNLOADS\GitHub-Forks\SVG\Tests\W3CTestSuite\svg\paths-data-02-t.svg";
+                var path = @"c:\DOWNLOADS\GitHub-Forks\WalletWasabi\WalletWasabi.Fluent\Views\NavBar\NavBar.axaml";
+                var svg = File.ReadAllText(path);
+                var factory = new XmlFactory();
+                //XmlParser.Parse(svg.AsSpan(), factory);
+                XmlParser2.Parse(svg.AsSpan(), factory);
+                if (factory.GetRootElement() is XmlElement root)
+                {
+                    var sb = new StringBuilder();
+                    Print(root, sb, 0, "  ");
+                    Console.WriteLine(sb.ToString());
+                }
+                return;
+            }
+
             if (args.Length == 1)
             {
                 var path = args[0];
