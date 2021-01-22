@@ -47,18 +47,15 @@ namespace XmlParser
                     {
                         break;
                     }
-                    var slice = span.Slice(position + 1);
-
-                    for (int slicePosition = 0; slicePosition < slice.Length; slicePosition++)
+                    
+                    for (position += 1; position < span.Length; position++)
                     {
-                        position++;
-
-                        if (slice[slicePosition] == '\r')
+                        if (span[position] == '\r')
                         {
                             lastWhitespace = position;
                             column = 1;
                         }
-                        else if (slice[slicePosition] == '\n')
+                        else if (span[position] == '\n')
                         {
                             lastWhitespace = position;
                             column = 1;
@@ -72,7 +69,7 @@ namespace XmlParser
                         // Comment End
                         if (skipComment)
                         {
-                            if (slice[slicePosition] == '-' && slice[slicePosition + 1] == '-' && slice[slicePosition + 2] == '>')
+                            if (span[position] == '-' && span[position + 1] == '-' && span[position + 2] == '>')
                             {
                                 skipComment = false;
                                 position += 3;
@@ -83,36 +80,35 @@ namespace XmlParser
                         }
 
                         // Comment Start
-                        if (slice[slicePosition] == '!' && slice[slicePosition + 1] == '-' && slice[slicePosition + 2] == '-')
+                        if (span[position] == '!' && span[position + 1] == '-' && span[position + 2] == '-')
                         {
                             skipComment = true;
-                            slicePosition += 3;
                             position += 3;
                             column += 3;
                             continue;
                         }
 
                         // Skip Value
-                        if (skipValue && slice[slicePosition] != '\'' && slice[slicePosition] != '\"')
+                        if (skipValue && span[position] != '\'' && span[position] != '\"')
                         {
                             continue;
                         }
  
                         // Start Value
-                        if (slice[slicePosition] == '\'' || slice[slicePosition] == '\"')
+                        if (span[position] == '\'' || span[position] == '\"')
                         {
                             if (skipValue)
                             {
                                 skipValue = false;
 
-                                var value = span.Slice(skipValueStart, position - skipValueStart + 1);
+                                var value = span.Slice(skipValueStart + 1, position - skipValueStart - 1);
+                                //Console.WriteLine($"'{value.ToString()}'");
 
-                                //Console.WriteLine($"{value.ToString()}");
-
+                                // Attribute
                                 if (lastWhitespace >= 0 && span[skipValueStart - 1] == '=')
                                 {
                                     var key = span.Slice(lastWhitespace + 1, skipValueStart - lastWhitespace - 2);
-                                    //Console.WriteLine($"'{key.ToString()}'='{value.Slice(1, value.Length - 2).ToString()}'");
+                                    //Console.WriteLine($"'{key.ToString()}'='{value.ToString()}'");
                                 }
                             }
                             else
@@ -123,13 +119,13 @@ namespace XmlParser
                             }
                         }
 
-                        if (slice[slicePosition] == '/')
+                        if (span[position] == '/')
                         {
                             slash = position;
                         }
 
                         // Whitespace
-                        if (slice[slicePosition] == ' ' || slice[slicePosition] == '\t' || slice[slicePosition] == '\n' || slice[slicePosition] == '\r')
+                        if (span[position] == ' ' || span[position] == '\t' || span[position] == '\n' || span[position] == '\r')
                         {
                             lastWhitespace = position;
                             if (end < 0)
@@ -140,7 +136,7 @@ namespace XmlParser
                         }
 
                         // Tag End
-                        if (slice[slicePosition] == '>')
+                        if (span[position] == '>')
                         {
                             if (end < 0)
                             {
