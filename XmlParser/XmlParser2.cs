@@ -12,7 +12,7 @@ namespace XmlParser
             var column = 1;
             var position = 0;
             var previousEnd = -1;
-            loop:
+loop:
             for (; position < span.Length; position++)
             {
                 switch (span[position])
