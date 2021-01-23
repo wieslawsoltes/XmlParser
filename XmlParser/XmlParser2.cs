@@ -174,32 +174,32 @@ tag:
                     if (previousEnd >= 0)
                     {
                         var content = span.Slice(previousEnd + 1, start - previousEnd - 1);
-                        var trimmed = content.Trim();
-                        if (trimmed.Length > 0)
-                        {
-                            Console.WriteLine($"'{content.ToString()}'");
-                        }
+                        //var trimmed = content.Trim();
+                        //if (trimmed.Length > 0)
+                        //{
+                        //    Console.WriteLine($"'{content.ToString()}'");
+                        //}
                     }
 
                     // </tag>
                     var e = span.Slice(start + 2, end - start - 2);
                     //var e = span.Slice(start, end - start + 1);
                     level--;
-                    Console.WriteLine($"[1] {new string(' ', level * 2)}'</{e.ToString()}>' {startLine}:{startColumn}");
+                    //Console.WriteLine($"[1] {new string(' ', level * 2)}'</{e.ToString()}>' {startLine}:{startColumn}");
                 }
                 else if (slash == position - 1)
                 {
                     // <tag/>
                     var e = span.Slice(start + 1, end - start - 1);
                     //var e = span.Slice(start, end - start);
-                    Console.WriteLine($"[2] {new string(' ', level * 2)}'<{e.ToString()}/>' {startLine}:{startColumn}");
+                    //Console.WriteLine($"[2] {new string(' ', level * 2)}'<{e.ToString()}/>' {startLine}:{startColumn}");
                 }
                 else
                 {
                     // <tag>
                     var e = span.Slice(start + 1, end - start - 1);
                     //var e = span.Slice(start, end - start + 1);
-                    Console.WriteLine($"[3] {new string(' ', level * 2)}'<{e.ToString()}>' {startLine}:{startColumn}");
+                    //Console.WriteLine($"[3] {new string(' ', level * 2)}'<{e.ToString()}>' {startLine}:{startColumn}");
                     level++;
                 }
 
