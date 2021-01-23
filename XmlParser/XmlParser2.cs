@@ -67,6 +67,7 @@ tag:
             }
 
             var skipComment = false;
+            var skipProcessingInstruction = false;
 
             for (position += 1; position < span.Length; position++)
             {
@@ -87,6 +88,28 @@ tag:
                     default:
                         column++;
                         break;
+                }
+
+                // Processing Instruction End
+                if (skipProcessingInstruction)
+                {
+                    if (span[position] == '?' && span[position + 1] == '>')
+                    {
+                        position += 2;
+                        column += 2;
+                        previousEnd = position;
+                        break;
+                    }
+                    continue;
+                }
+
+                // Processing Instruction Start
+                if (span[position] == '?')
+                {
+                    skipProcessingInstruction = true;
+                    position += 1;
+                    column += 1;
+                    continue;
                 }
 
                 // Comment End
