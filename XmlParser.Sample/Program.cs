@@ -59,8 +59,9 @@ namespace XmlParser.Sample
         private static void Main(string[] args)
         {
             {
-                var path = @"c:\DOWNLOADS\GitHub-Forks\SVG\Tests\W3CTestSuite\svg\paths-data-02-t.svg";
+                //var path = @"c:\DOWNLOADS\GitHub-Forks\SVG\Tests\W3CTestSuite\svg\paths-data-02-t.svg";
                 //var path = @"c:\DOWNLOADS\GitHub-Forks\WalletWasabi\WalletWasabi.Fluent\Views\NavBar\NavBar.axaml";
+                var path = @"c:\DOWNLOADS\GitHub-Forks\SVG\Tests\W3CTestSuite\svg\__AJ_Digital_Camera.svg";
                 var svg = File.ReadAllText(path);
                 var factory = new XmlFactory();
                 //XmlParser.Parse(svg.AsSpan(), factory);
@@ -73,7 +74,7 @@ namespace XmlParser.Sample
                 }
                 return;
             }
-
+/*
             if (args.Length == 1)
             {
                 var path = args[0];
@@ -145,6 +146,7 @@ namespace XmlParser.Sample
                 sw.Stop();
                 Console.WriteLine($"{sw.Elapsed.TotalMilliseconds}ms");
             }
+*/
         }
     }
 }

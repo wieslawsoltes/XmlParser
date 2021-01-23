@@ -16,7 +16,7 @@ namespace XmlParser.Benchmark
             var types = typeof(Program)
                 .Assembly
                 .GetExportedTypes()
-                .Where(r => r != typeof(Program))
+                .Where(r => r != typeof(Program) && r.IsPublic)
                 .OrderBy(r => r.Name);
 
 			var job = Job.Default;
