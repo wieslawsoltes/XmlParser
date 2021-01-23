@@ -11,7 +11,8 @@ namespace XmlParser
             var line = 1;
             var column = 1;
             var position = 0;
-loop:
+            var previousEnd = -1;
+            loop:
             for (; position < span.Length; position++)
             {
                 switch (span[position])
@@ -95,6 +96,7 @@ tag:
                     {
                         position += 3;
                         column += 3;
+                        previousEnd = position;
                         break;
                     }
                     continue;
@@ -169,24 +171,39 @@ tag:
 
                 if (slash == start + 1)
                 {
+                    if (previousEnd >= 0)
+                    {
+                        var content = span.Slice(previousEnd + 1, start - previousEnd - 1);
+                        var trimmed = content.Trim();
+                        if (trimmed.Length > 0)
+                        {
+                            Console.WriteLine($"'{content.ToString()}'");
+                        }
+                    }
+
                     // </tag>
                     var e = span.Slice(start + 2, end - start - 2);
+                    //var e = span.Slice(start, end - start + 1);
                     level--;
-                    //Console.WriteLine($"[1] {new string(' ', level * 2)}'</{e.ToString()}>' {startLine}:{startColumn}");
+                    Console.WriteLine($"[1] {new string(' ', level * 2)}'</{e.ToString()}>' {startLine}:{startColumn}");
                 }
                 else if (slash == position - 1)
                 {
                     // <tag/>
                     var e = span.Slice(start + 1, end - start - 1);
-                    //Console.WriteLine($"[2] {new string(' ', level * 2)}'<{e.ToString()}/>' {startLine}:{startColumn}");
+                    //var e = span.Slice(start, end - start);
+                    Console.WriteLine($"[2] {new string(' ', level * 2)}'<{e.ToString()}/>' {startLine}:{startColumn}");
                 }
                 else
                 {
                     // <tag>
                     var e = span.Slice(start + 1, end - start - 1);
-                    //Console.WriteLine($"[3] {new string(' ', level * 2)}'<{e.ToString()}>' {startLine}:{startColumn}");
+                    //var e = span.Slice(start, end - start + 1);
+                    Console.WriteLine($"[3] {new string(' ', level * 2)}'<{e.ToString()}>' {startLine}:{startColumn}");
                     level++;
                 }
+
+                previousEnd = position;
 
                 break;
             }
