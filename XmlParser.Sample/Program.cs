@@ -58,25 +58,37 @@ namespace XmlParser.Sample
 
         private static void Main(string[] args)
         {
+#if false
             {
-                var path = @"c:\DOWNLOADS\GitHub-Forks\SVG\Tests\W3CTestSuite\svg\struct-svg-03-f.svg";
-                //var path = @"c:\DOWNLOADS\GitHub-Forks\SVG\Tests\W3CTestSuite\svg\paths-data-02-t.svg";
                 //var path = @"c:\DOWNLOADS\GitHub-Forks\WalletWasabi\WalletWasabi.Fluent\Views\NavBar\NavBar.axaml";
                 //var path = @"c:\DOWNLOADS\GitHub-Forks\SVG\Tests\W3CTestSuite\svg\__AJ_Digital_Camera.svg";
-                //var path = @"c:\DOWNLOADS\_TMP\__issue-247-02.svg";
+                //var path = @"c:\DOWNLOADS\GitHub-Forks\SVG\Tests\W3CTestSuite\svg\__issue-134-01.svg";
+                //var path = @"c:\DOWNLOADS\GitHub-Forks\SVG\Tests\W3CTestSuite\svg\__tiger.svg";
+                //var path = @"c:\DOWNLOADS\GitHub-Forks\SVG\Tests\W3CTestSuite\svg\paths-data-02-t.svg";
+                var path = @"c:\DOWNLOADS\GitHub-Forks\SVG\Tests\W3CTestSuite\svg\struct-svg-03-f.svg";
+                //var path = @"c:\DOWNLOADS\GitHub-Forks\SVG\Tests\W3CTestSuite\svg\__issue-247-02.svg";
+
                 var svg = File.ReadAllText(path);
                 var factory = new XmlFactory();
+
+                var sw = Stopwatch.StartNew();
+
                 //XmlParser.Parse(svg.AsSpan(), factory);
                 XmlParser2.Parse(svg.AsSpan(), factory);
+
+                sw.Stop();
+                Console.WriteLine($"{sw.Elapsed.TotalMilliseconds}ms");
+
                 if (factory.GetRootElement() is XmlElement root)
                 {
                     var sb = new StringBuilder();
                     Print(root, sb, 0, "  ");
                     Console.WriteLine(sb.ToString());
                 }
+
                 return;
             }
-/*
+#endif
             if (args.Length == 1)
             {
                 var path = args[0];
@@ -84,7 +96,10 @@ namespace XmlParser.Sample
                 var sw = Stopwatch.StartNew();
 
                 var factory = new XmlFactory();
-                XmlParser.Parse(svg.AsSpan(), factory);
+
+                //XmlParser.Parse(svg.AsSpan(), factory);
+
+                XmlParser2.Parse(svg.AsSpan(), factory);
 
                 //XmlParser.Parse(svg.AsSpan());
 
@@ -95,12 +110,12 @@ namespace XmlParser.Sample
             }
             else if (args.Length == 2)
             {
-                if (args[1] != "-d")
+                if (args[0] != "-d")
                 {
                     return;
                 }
 
-                var paths = Directory.GetFiles(args[2], "*.svg");
+                var paths = Directory.GetFiles(args[1], "*.svg");
 
                 foreach (var path in paths)
                 {
@@ -111,44 +126,23 @@ namespace XmlParser.Sample
                     try
                     {
                         var factory = new XmlFactory();
-                        XmlParser.Parse(svg.AsSpan(), factory);
+
+                        //XmlParser.Parse(svg.AsSpan(), factory);
+
+                        XmlParser2.Parse(svg.AsSpan(), factory);
+
                         //XmlParser.Parse(svg.AsSpan());
                     }
                     catch (Exception e)
                     {
                         Console.WriteLine(e.Message);
                         Console.WriteLine(e.StackTrace);
-                        //return;
                     }
 
                     sw.Stop();
                     Console.WriteLine($"{sw.Elapsed.TotalMilliseconds}ms");
                 }
             }
-            else
-            {
-                var sw = Stopwatch.StartNew();
-                
-                //var factory = new XmlFactory();
-                //XmlParser.Parse(Samples.Empty.AsSpan(), factory);
-                //var root = factory.GetRootElement();
-
-                //XmlParser.Parse(Samples.Empty.AsSpan());
- 
-                //XmlTextReaderParser.Parse(Samples.Empty);
-
-                var factory = new XmlFactory();
-                XmlParser.Parse(Samples.struct_svg_03_f.AsSpan(), factory);
-                var root = factory.GetRootElement();
-
-                //XmlParser.Parse(Samples.struct_svg_03_f.AsSpan());
-
-                //XmlTextReaderParser.Parse(Samples.struct_svg_03_f);
-
-                sw.Stop();
-                Console.WriteLine($"{sw.Elapsed.TotalMilliseconds}ms");
-            }
-*/
         }
     }
 }
