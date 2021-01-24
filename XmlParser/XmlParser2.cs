@@ -1,4 +1,8 @@
 ﻿#nullable enable
+//#define DEBUG_ELEMENT_NAME
+//#define DEBUG_CONTENT
+//#define DEBUG_VALUE
+//#define DEBUG_ATTRIBUTE
 using System;
 
 namespace XmlParser
@@ -7,127 +11,89 @@ namespace XmlParser
     {
         public static void Parse(ReadOnlySpan<char> span, IXmlFactory? factory = null)
         {
-            var level = 0;
-            var line = 1;
-            var column = 1;
+            var length = span.Length;
             var position = 0;
             var previousEnd = -1;
-            var length = span.Length;
+#if DEBUG_ELEMENT_NAME
+            var level = 0;
+#endif
 
             for (; position < length; position++)
-            {
+            {  
                 switch (span[position])
                 {
                     // Whitespace
                     case ' ':
                     {
-                        column++;
-                        break;
+                        continue;
                     }
                     // Whitespace
                     case '\t':
                     {
-                        column++;
-                        break;
+                        continue;
                     }
                     // Whitespace
                     case '\r':
                     {
-                        column = 1;
-                        break;
+                        continue;
                     }
                     // Whitespace
                     case '\n':
                     {
-                        column = 1;
-                        line++;
-                        break;
+                        continue;
                     }
                     // Tag Start
                     case '<':
                     {
-                        var start = position;
-                        var startLine = line;
-                        var startColumn = column;
-                        var end = -1;
-                        var slash = -1;
-                        var skipValue = false;
-                        var skipValueStart = -1;
-                        var lastWhitespace = -1;
-
                         if (position + 1 >= length)
                         {
                            break;
                         }
 
-                        var skipProcessingInstruction = false;
-                        var skipComment = false;
-                        var skipCdata = false;
-                        var skipDoctype = false;
+                        var start = position;
+                        var end = -1;
+                        var slash = -1;
+                        var lastWhitespace = -1;
 
                         for (position += 1; position < length; position++)
                         {
-                            // Processing Instruction End
-                            if (skipProcessingInstruction)
-                            {
-                                if (span[position] == '?' && span[position + 1] == '>')
-                                {
-                                    position += 2;
-                                    column += 2;
-                                    previousEnd = position;
-                                    break;
-                                }
-                                continue;
-                            }
-
-                            // Processing Instruction Start
+                            // Processing Instruction: <? ... ?>
                             if (span[position] == '?')
                             {
-                                skipProcessingInstruction = true;
-                                position += 1;
-                                column += 1;
-                                continue;
-                            }
-
-                            // Comment End
-                            if (skipComment)
-                            {
-                                if (span[position] == '-' && span[position + 1] == '-' && span[position + 2] == '>')
+                                for (position += 1; position < length; position++)
                                 {
-                                    position += 3;
-                                    column += 3;
-                                    previousEnd = position;
-                                    break;
+                                    if (span[position] == '?' && span[position + 1] == '>')
+                                    {
+                                        position += 2;
+                                        previousEnd = position;
+                                        break;
+                                    }
                                 }
-                                continue;
+                                break;
                             }
 
-                            // Comment Start
+                            // Comment: <!-- ... -->
                             if (length >= position + 2
                                 && span[position] == '!'
                                 && span[position + 1] == '-' 
                                 && span[position + 2] == '-')
                             {
-                                skipComment = true;
-                                position += 3;
-                                column += 3;
-                                continue;
-                            }
+                                position += 2;
 
-                            // CDATA End
-                            if (skipCdata)
-                            {
-                                if (span[position] == ']' && span[position + 1] == ']' && span[position + 2] == '>')
+                                for (position += 1; position < length; position++)
                                 {
-                                    position += 3;
-                                    column += 3;
-                                    previousEnd = position;
-                                    break;
+                                    if (span[position] == '-' && span[position + 1] == '-' && span[position + 2] == '>')
+                                    {
+                                        position += 3;
+                                        previousEnd = position;
+                                        break;
+                                    }
                                 }
-                                continue;
+
+                                break;
                             }
 
-                            // CDATA Start
+                            // CDATA: <![CDATA[ ... ]]>
                             if (length >= position + 7
                                 && span[position] == '!' 
                                 && span[position + 1] == '[' 
@@ -138,26 +104,22 @@ namespace XmlParser
                                 && span[position + 6] == 'A' 
                                 && span[position + 7] == '[')
                             {
-                                skipCdata = true;
-                                position += 8;
-                                column += 8;
-                                continue;
-                            }
+                                position += 7;
 
-                            // DOCTYPE End
-                            if (skipDoctype)
-                            {
-                                if (span[position] == ']' && span[position + 1] == '>')
+                                for (position += 1; position < length; position++)
                                 {
-                                    position += 2;
-                                    column += 2;
-                                    previousEnd = position;
-                                    break;
+                                    if (span[position] == ']' && span[position + 1] == ']' && span[position + 2] == '>')
+                                    {
+                                        position += 3;
+                                        previousEnd = position;
+                                        break;
+                                    }
                                 }
-                                continue;
+
+                                break;
                             }
 
-                            // DOCTYPE Start
+                            // DOCTYPE: <!DOCTYPE ... >
                             if (length >= position + 7 
                                 && span[position] == '!'
                                 && span[position + 1] == 'D' 
@@ -168,41 +130,49 @@ namespace XmlParser
                                 && span[position + 6] == 'P' 
                                 && span[position + 7] == 'E')
                             {
-                                skipDoctype = true;
-                                position += 8;
-                                column += 8;
-                                continue;
-                            }            
+                                position += 7;
 
-                            // Skip Value
-                            if (skipValue && span[position] != '\'' && span[position] != '\"')
-                            {
-                                continue;
-                            }
-
-                            // Start Value
-                            if (span[position] == '\'' || span[position] == '\"')
-                            {
-                                if (skipValue)
+                                for (position += 1; position < length; position++)
                                 {
-                                    skipValue = false;
-
-                                    var value = span.Slice(skipValueStart + 1, position - skipValueStart - 1);
-                                    //Console.WriteLine($"'{value.ToString()}'");
-
-                                    // Attribute
-                                    if (lastWhitespace >= 0 && span[skipValueStart - 1] == '=')
+                                    if (span[position] == '>')
                                     {
-                                        var key = span.Slice(lastWhitespace + 1, skipValueStart - lastWhitespace - 2);
-                                        //Console.WriteLine($"'{key.ToString()}'='{value.ToString()}'");
+                                        position += 1;
+                                        previousEnd = position;
+                                        break;
                                     }
                                 }
-                                else
+
+                                break;
+                            }            
+
+                            // Value: '...' or "..."
+                            if (span[position] == '\"' || span[position] == '\'')
+                            {
+                                var skipValueEndChar = span[position];
+                                var skipValueStart = position;
+
+                                for (position += 1; position < length; position++)
                                 {
-                                    skipValueStart = position;
-                                    skipValue = true;
-                                    continue;
+                                    if (span[position] == skipValueEndChar)
+                                    {
+                                        break;
+                                    }
                                 }
+
+                                var value = span.Slice(skipValueStart + 1, position - skipValueStart - 1);
+#if DEBUG_VALUE
+                                Console.WriteLine($"'{value.ToString()}'");
+#endif
+                                // Attribute
+                                if (lastWhitespace >= 0 && span[skipValueStart - 1] == '=')
+                                {
+                                    var key = span.Slice(lastWhitespace + 1, skipValueStart - lastWhitespace - 2);
+#if DEBUG_ATTRIBUTE
+                                    Console.WriteLine($"'{key.ToString()}'='{value.ToString()}'");
+#endif
+                                }
+
+                                continue;
                             }
 
                             // Whitespace
@@ -229,8 +199,6 @@ namespace XmlParser
                                 case '\n':
                                 {
                                     lastWhitespace = position;
-                                    column = 1;
-                                    line++;
                                     if (end < 0)
                                     {
                                         end = position;
@@ -240,17 +208,11 @@ namespace XmlParser
                                 case '\r':
                                 {
                                     lastWhitespace = position;
-                                    column = 1;
                                     if (end < 0)
                                     {
                                         end = position;
                                     }
                                     continue;
-                                }
-                                default:
-                                {
-                                    column++;
-                                    break;
                                 }
                             }
 
@@ -276,18 +238,22 @@ namespace XmlParser
                                 if (previousEnd >= 0)
                                 {
                                     var content = span.Slice(previousEnd + 1, start - previousEnd - 1);
-                                    //var trimmed = content.Trim();
-                                    //if (trimmed.Length > 0)
-                                    //{
-                                    //    Console.WriteLine($"'{content.ToString()}'");
-                                    //}
+#if DEBUG_CONTENT
+                                    var trimmed = content.Trim();
+                                    if (trimmed.Length > 0)
+                                    {
+                                        Console.WriteLine($"'{content.ToString()}'");
+                                    }
+#endif
                                 }
 
                                 // </tag>
                                 var e = span.Slice(start + 2, end - start - 2);
-                                //var e = span.Slice(start, end - start + 1);
+                                // var e = span.Slice(start, end - start + 1);
+#if DEBUG_ELEMENT_NAME
                                 level--;
-                                //Console.WriteLine($"[1] {new string(' ', level * 2)}'</{e.ToString()}>' {startLine}:{startColumn}");
+                                Console.WriteLine($"[1] {new string(' ', level * 2)}'</{e.ToString()}>'");
+#endif
                                 previousEnd = position;
                                 break;
                             }
@@ -295,8 +261,10 @@ namespace XmlParser
                             {
                                 // <tag/>
                                 var e = span.Slice(start + 1, end - start - 1);
-                                //var e = span.Slice(start, end - start);
-                                //Console.WriteLine($"[2] {new string(' ', level * 2)}'<{e.ToString()}/>' {startLine}:{startColumn}");
+                                // var e = span.Slice(start, end - start);
+#if DEBUG_ELEMENT_NAME
+                                Console.WriteLine($"[2] {new string(' ', level * 2)}'<{e.ToString()}/>'"); 
+#endif
                                 previousEnd = position;
                                 break;
                             }
@@ -304,18 +272,15 @@ namespace XmlParser
                             {
                                 // <tag>
                                 var e = span.Slice(start + 1, end - start - 1);
-                                //var e = span.Slice(start, end - start + 1);
-                                //Console.WriteLine($"[3] {new string(' ', level * 2)}'<{e.ToString()}>' {startLine}:{startColumn}");
-                                level++;
+                                // var e = span.Slice(start, end - start + 1);
+#if DEBUG_ELEMENT_NAME
+                                Console.WriteLine($"[3] {new string(' ', level * 2)}'<{e.ToString()}>'");
+                                level++; 
+#endif
                                 previousEnd = position;
                                 break;
                             }
                         }
-                        break;
-                    }
-                    default:
-                    {
-                        column++;
                         break;
                     }
                 }
