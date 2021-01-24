@@ -58,16 +58,16 @@ namespace XmlParser.Sample
 
         private static void Main(string[] args)
         {
-#if false
+#if true
             {
                 //var path = @"c:\DOWNLOADS\GitHub-Forks\WalletWasabi\WalletWasabi.Fluent\Views\NavBar\NavBar.axaml";
                 //var path = @"c:\DOWNLOADS\GitHub-Forks\SVG\Tests\W3CTestSuite\svg\__AJ_Digital_Camera.svg";
                 //var path = @"c:\DOWNLOADS\GitHub-Forks\SVG\Tests\W3CTestSuite\svg\__issue-134-01.svg";
                 //var path = @"c:\DOWNLOADS\GitHub-Forks\SVG\Tests\W3CTestSuite\svg\__tiger.svg";
                 //var path = @"c:\DOWNLOADS\GitHub-Forks\SVG\Tests\W3CTestSuite\svg\paths-data-02-t.svg";
-                //var path = @"c:\DOWNLOADS\GitHub-Forks\SVG\Tests\W3CTestSuite\svg\struct-svg-03-f.svg";
+                var path = @"c:\DOWNLOADS\GitHub-Forks\SVG\Tests\W3CTestSuite\svg\struct-svg-03-f.svg";
                 //var path = @"c:\DOWNLOADS\GitHub-Forks\SVG\Tests\W3CTestSuite\svg\__issue-247-02.svg";
-                var path = @"c:\DOWNLOADS\GitHub-Forks\SVG\Tests\W3CTestSuite\svg\render-elems-03-t.svg";
+                //var path = @"c:\DOWNLOADS\GitHub-Forks\SVG\Tests\W3CTestSuite\svg\render-elems-03-t.svg";
 
                 var svg = File.ReadAllText(path);
                 var factory = new XmlFactory();
@@ -111,17 +111,21 @@ namespace XmlParser.Sample
             }
             else if (args.Length == 2)
             {
+                // -d c:\DOWNLOADS\GitHub-Forks\SVG\Tests\W3CTestSuite\svg\
+                // -d c:\DOWNLOADS\GitHub-Forks\resvg-test-suite\svg\
+
                 if (args[0] != "-d")
                 {
                     return;
                 }
 
                 var paths = Directory.GetFiles(args[1], "*.svg");
+                //var swt = Stopwatch.StartNew();
 
                 foreach (var path in paths)
                 {
-                    Console.WriteLine($"{path}");
                     var svg = File.ReadAllText(path);
+                    Console.WriteLine($"{path}");
                     var sw = Stopwatch.StartNew();
 
                     try
@@ -143,6 +147,9 @@ namespace XmlParser.Sample
                     sw.Stop();
                     Console.WriteLine($"{sw.Elapsed.TotalMilliseconds}ms");
                 }
+
+                //swt.Stop();
+                //Console.WriteLine($"{swt.Elapsed.TotalMilliseconds}ms");
             }
         }
     }
