@@ -58,7 +58,7 @@ namespace XmlParser.Sample
 
         private static void Main(string[] args)
         {
-#if true
+#if false
             {
                 //var path = @"c:\DOWNLOADS\GitHub-Forks\WalletWasabi\WalletWasabi.Fluent\Views\NavBar\NavBar.axaml";
                 //var path = @"c:\DOWNLOADS\GitHub-Forks\SVG\Tests\W3CTestSuite\svg\__AJ_Digital_Camera.svg";
