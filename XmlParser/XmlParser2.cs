@@ -216,6 +216,7 @@ namespace XmlParser
                                 }
                             }
 
+                            // Tag Slash
                             if (span[position] == '/')
                             {
                                 slash = position;
