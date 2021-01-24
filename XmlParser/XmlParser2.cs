@@ -60,8 +60,10 @@ namespace XmlParser
                            break;
                         }
 
-                        var skipComment = false;
                         var skipProcessingInstruction = false;
+                        var skipComment = false;
+                        var skipCdata = false;
+                        var skipDoctype = false;
 
                         for (position += 1; position < length; position++)
                         {
@@ -101,13 +103,76 @@ namespace XmlParser
                             }
 
                             // Comment Start
-                            if (span[position] == '!' && span[position + 1] == '-' && span[position + 2] == '-')
+                            if (length >= position + 2
+                                && span[position] == '!'
+                                && span[position + 1] == '-' 
+                                && span[position + 2] == '-')
                             {
                                 skipComment = true;
                                 position += 3;
                                 column += 3;
                                 continue;
                             }
+
+                            // CDATA End
+                            if (skipCdata)
+                            {
+                                if (span[position] == ']' && span[position + 1] == ']' && span[position + 2] == '>')
+                                {
+                                    position += 3;
+                                    column += 3;
+                                    previousEnd = position;
+                                    break;
+                                }
+                                continue;
+                            }
+
+                            // CDATA Start
+                            if (length >= position + 7
+                                && span[position] == '!' 
+                                && span[position + 1] == '[' 
+                                && span[position + 2] == 'C' 
+                                && span[position + 3] == 'D' 
+                                && span[position + 4] == 'A' 
+                                && span[position + 5] == 'T' 
+                                && span[position + 6] == 'A' 
+                                && span[position + 7] == '[')
+                            {
+                                skipCdata = true;
+                                position += 8;
+                                column += 8;
+                                continue;
+                            }
+
+                            // DOCTYPE End
+                            if (skipDoctype)
+                            {
+                                if (span[position] == ']' && span[position + 1] == '>')
+                                {
+                                    position += 2;
+                                    column += 2;
+                                    previousEnd = position;
+                                    break;
+                                }
+                                continue;
+                            }
+
+                            // DOCTYPE Start
+                            if (length >= position + 7 
+                                && span[position] == '!'
+                                && span[position + 1] == 'D' 
+                                && span[position + 2] == 'O' 
+                                && span[position + 3] == 'C' 
+                                && span[position + 4] == 'T' 
+                                && span[position + 5] == 'Y' 
+                                && span[position + 6] == 'P' 
+                                && span[position + 7] == 'E')
+                            {
+                                skipDoctype = true;
+                                position += 8;
+                                column += 8;
+                                continue;
+                            }            
 
                             // Skip Value
                             if (skipValue && span[position] != '\'' && span[position] != '\"')
@@ -223,7 +288,6 @@ namespace XmlParser
                                 //var e = span.Slice(start, end - start + 1);
                                 level--;
                                 //Console.WriteLine($"[1] {new string(' ', level * 2)}'</{e.ToString()}>' {startLine}:{startColumn}");
-        
                                 previousEnd = position;
                                 break;
                             }
@@ -233,7 +297,6 @@ namespace XmlParser
                                 var e = span.Slice(start + 1, end - start - 1);
                                 //var e = span.Slice(start, end - start);
                                 //Console.WriteLine($"[2] {new string(' ', level * 2)}'<{e.ToString()}/>' {startLine}:{startColumn}");
-                                
                                 previousEnd = position;
                                 break;
                             }
@@ -244,7 +307,6 @@ namespace XmlParser
                                 //var e = span.Slice(start, end - start + 1);
                                 //Console.WriteLine($"[3] {new string(' ', level * 2)}'<{e.ToString()}>' {startLine}:{startColumn}");
                                 level++;
-                                
                                 previousEnd = position;
                                 break;
                             }
