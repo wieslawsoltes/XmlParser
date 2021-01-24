@@ -17,12 +17,17 @@ namespace XmlParser
             _element = default;
         }
 
+        public void PushElement()
+        {
+            PushElement(default(string));
+        }
+
         public void PushElement(ReadOnlySpan<char> elementName)
         {
             PushElement(elementName.ToString());
         }
 
-        public void PushElement(string elementName)
+        public void PushElement(string? elementName)
         {
             _element = new XmlElement()
             {
@@ -45,6 +50,14 @@ namespace XmlParser
         public void PopElement()
         {
             _element = _elements.Pop();
+        }
+
+        public void SetElementName(ReadOnlySpan<char> elementName)
+        {
+            if (_element != null)
+            {
+                _element.ElementName = elementName.ToString();
+            }
         }
 
         public void AddElementContent(ReadOnlySpan<char> content)
