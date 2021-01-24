@@ -42,7 +42,6 @@ namespace XmlParser
                         var end = -1;
                         var slash = -1;
                         var lastWhitespace = -1;
-
                         for (i += 1; i < l; i++)
                         {
                             // Processing Instruction: <? ... ?>
@@ -114,6 +113,11 @@ namespace XmlParser
                                 break;
                             }            
 
+                            if (i - 1 == start && s[i] != '/')
+                            {
+                                factory?.PushElement();
+                            }
+
                             // Value: '...' or "..."
                             if (s[i] == '\"' || s[i] == '\'')
                             {
@@ -136,6 +140,7 @@ namespace XmlParser
                                 if (lastWhitespace >= 0 && s[skipValueStart - 1] == '=')
                                 {
                                     var key = s.Slice(lastWhitespace + 1, skipValueStart - lastWhitespace - 2);
+                                    factory?.AddElementAttribute(key, value);
 #if DEBUG_ATTRIBUTE
                                     Console.WriteLine($"'{key.ToString()}'='{value.ToString()}'");
 #endif
@@ -185,25 +190,27 @@ namespace XmlParser
                             // Tag Name
                             if (slash == start + 1)
                             {
-                                if (previousEnd >= 0)
-                                {
-                                    var content = s.Slice(previousEnd + 1, start - previousEnd - 1);
-#if DEBUG_CONTENT
-                                    var trimmed = content.Trim();
-                                    if (trimmed.Length > 0)
-                                    {
-                                        Console.WriteLine($"'{content.ToString()}'");
-                                    }
-#endif
-                                }
-
                                 // </tag>
                                 var e = s.Slice(start + 2, end - start - 2);
-                                // var e = span.Slice(start, end - start + 1);
+                                factory?.PopElement();
+                                factory?.SetElementName(e);
 #if DEBUG_ELEMENT_NAME
                                 level--;
                                 Console.WriteLine($"[1] {new string(' ', level * 2)}'</{e.ToString()}>'");
 #endif
+                                if (previousEnd >= 0)
+                                {
+                                    var content = s.Slice(previousEnd + 1, start - previousEnd - 1);
+                                    var trimmed = content.Trim();
+                                    if (trimmed.Length > 0)
+                                    {
+                                        factory?.AddElementContent(trimmed);
+#if DEBUG_CONTENT
+                                        Console.WriteLine($"'{content.ToString()}'");
+#endif
+                                    }
+
+                                }
                                 previousEnd = i;
                                 break;
                             }
@@ -211,7 +218,8 @@ namespace XmlParser
                             {
                                 // <tag/>
                                 var e = s.Slice(start + 1, end - start - 1);
-                                // var e = span.Slice(start, end - start);
+                                factory?.SetElementName(e);
+                                factory?.PopElement();
 #if DEBUG_ELEMENT_NAME
                                 Console.WriteLine($"[2] {new string(' ', level * 2)}'<{e.ToString()}/>'"); 
 #endif
@@ -222,10 +230,10 @@ namespace XmlParser
                             {
                                 // <tag>
                                 var e = s.Slice(start + 1, end - start - 1);
-                                // var e = span.Slice(start, end - start + 1);
+                                factory?.SetElementName(e);
 #if DEBUG_ELEMENT_NAME
                                 Console.WriteLine($"[3] {new string(' ', level * 2)}'<{e.ToString()}>'");
-                                level++; 
+                                level++;
 #endif
                                 previousEnd = i;
                                 break;
