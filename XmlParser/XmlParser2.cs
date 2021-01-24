@@ -12,8 +12,9 @@ namespace XmlParser
             var column = 1;
             var position = 0;
             var previousEnd = -1;
-loop:
-            for (; position < span.Length; position++)
+            var length = span.Length;
+
+            for (; position < length; position++)
             {
                 switch (span[position])
                 {
@@ -21,218 +22,242 @@ loop:
                     case ' ':
                     {
                         column++;
-                        continue;
+                        break;
                     }
                     // Whitespace
                     case '\t':
                     {
                         column++;
-                        continue;
+                        break;
                     }
                     // Whitespace
                     case '\r':
                     {
                         column = 1;
-                        continue;
+                        break;
                     }
                     // Whitespace
                     case '\n':
                     {
                         column = 1;
                         line++;
-                        continue;
+                        break;
                     }
                     // Tag Start
                     case '<':
-                        goto tag;
-                    default:
-                        column++;
-                        continue;
-                }
-            }
-            goto end;
-tag:
-            var start = position;
-            var startLine = line;
-            var startColumn = column;
-            var end = -1;
-            var slash = -1;
-            var skipValue = false;
-            var skipValueStart = -1;
-            var lastWhitespace = -1;
-
-            if (position + 1 >= span.Length)
-            {
-                goto loop;
-            }
-
-            var skipComment = false;
-            var skipProcessingInstruction = false;
-
-            for (position += 1; position < span.Length; position++)
-            {
-                switch (span[position])
-                {
-                    // Whitespace
-                    case '\r':
-                        lastWhitespace = position;
-                        column = 1;
-                        break;
-                    // Whitespace
-                    case '\n':
-                        lastWhitespace = position;
-                        column = 1;
-                        line++;
-                        break;
-                    // Next Char
-                    default:
-                        column++;
-                        break;
-                }
-
-                // Processing Instruction End
-                if (skipProcessingInstruction)
-                {
-                    if (span[position] == '?' && span[position + 1] == '>')
                     {
-                        position += 2;
-                        column += 2;
-                        previousEnd = position;
-                        break;
-                    }
-                    continue;
-                }
+                        var start = position;
+                        var startLine = line;
+                        var startColumn = column;
+                        var end = -1;
+                        var slash = -1;
+                        var skipValue = false;
+                        var skipValueStart = -1;
+                        var lastWhitespace = -1;
 
-                // Processing Instruction Start
-                if (span[position] == '?')
-                {
-                    skipProcessingInstruction = true;
-                    position += 1;
-                    column += 1;
-                    continue;
-                }
-
-                // Comment End
-                if (skipComment)
-                {
-                    if (span[position] == '-' && span[position + 1] == '-' && span[position + 2] == '>')
-                    {
-                        position += 3;
-                        column += 3;
-                        previousEnd = position;
-                        break;
-                    }
-                    continue;
-                }
-
-                // Comment Start
-                if (span[position] == '!' && span[position + 1] == '-' && span[position + 2] == '-')
-                {
-                    skipComment = true;
-                    position += 3;
-                    column += 3;
-                    continue;
-                }
-
-                // Skip Value
-                if (skipValue && span[position] != '\'' && span[position] != '\"')
-                {
-                    continue;
-                }
-
-                // Start Value
-                if (span[position] == '\'' || span[position] == '\"')
-                {
-                    if (skipValue)
-                    {
-                        skipValue = false;
-
-                        var value = span.Slice(skipValueStart + 1, position - skipValueStart - 1);
-                        //Console.WriteLine($"'{value.ToString()}'");
-
-                        // Attribute
-                        if (lastWhitespace >= 0 && span[skipValueStart - 1] == '=')
+                        if (position + 1 >= length)
                         {
-                            var key = span.Slice(lastWhitespace + 1, skipValueStart - lastWhitespace - 2);
-                            //Console.WriteLine($"'{key.ToString()}'='{value.ToString()}'");
+                           break;
                         }
+
+                        var skipComment = false;
+                        var skipProcessingInstruction = false;
+
+                        for (position += 1; position < length; position++)
+                        {
+                            // Processing Instruction End
+                            if (skipProcessingInstruction)
+                            {
+                                if (span[position] == '?' && span[position + 1] == '>')
+                                {
+                                    position += 2;
+                                    column += 2;
+                                    previousEnd = position;
+                                    break;
+                                }
+                                continue;
+                            }
+
+                            // Processing Instruction Start
+                            if (span[position] == '?')
+                            {
+                                skipProcessingInstruction = true;
+                                position += 1;
+                                column += 1;
+                                continue;
+                            }
+
+                            // Comment End
+                            if (skipComment)
+                            {
+                                if (span[position] == '-' && span[position + 1] == '-' && span[position + 2] == '>')
+                                {
+                                    position += 3;
+                                    column += 3;
+                                    previousEnd = position;
+                                    break;
+                                }
+                                continue;
+                            }
+
+                            // Comment Start
+                            if (span[position] == '!' && span[position + 1] == '-' && span[position + 2] == '-')
+                            {
+                                skipComment = true;
+                                position += 3;
+                                column += 3;
+                                continue;
+                            }
+
+                            // Skip Value
+                            if (skipValue && span[position] != '\'' && span[position] != '\"')
+                            {
+                                continue;
+                            }
+
+                            // Start Value
+                            if (span[position] == '\'' || span[position] == '\"')
+                            {
+                                if (skipValue)
+                                {
+                                    skipValue = false;
+
+                                    var value = span.Slice(skipValueStart + 1, position - skipValueStart - 1);
+                                    //Console.WriteLine($"'{value.ToString()}'");
+
+                                    // Attribute
+                                    if (lastWhitespace >= 0 && span[skipValueStart - 1] == '=')
+                                    {
+                                        var key = span.Slice(lastWhitespace + 1, skipValueStart - lastWhitespace - 2);
+                                        //Console.WriteLine($"'{key.ToString()}'='{value.ToString()}'");
+                                    }
+                                }
+                                else
+                                {
+                                    skipValueStart = position;
+                                    skipValue = true;
+                                    continue;
+                                }
+                            }
+
+                            // Whitespace
+                            switch (span[position])
+                            {
+                                case ' ':
+                                {
+                                    lastWhitespace = position;
+                                    if (end < 0)
+                                    {
+                                        end = position;
+                                    }
+                                    continue;
+                                }
+                                case '\t':
+                                {
+                                    lastWhitespace = position;
+                                    if (end < 0)
+                                    {
+                                        end = position;
+                                    }
+                                    continue;
+                                }
+                                case '\n':
+                                {
+                                    lastWhitespace = position;
+                                    column = 1;
+                                    line++;
+                                    if (end < 0)
+                                    {
+                                        end = position;
+                                    }
+                                    continue;
+                                }
+                                case '\r':
+                                {
+                                    lastWhitespace = position;
+                                    column = 1;
+                                    if (end < 0)
+                                    {
+                                        end = position;
+                                    }
+                                    continue;
+                                }
+                                default:
+                                {
+                                    column++;
+                                    break;
+                                }
+                            }
+
+                            if (span[position] == '/')
+                            {
+                                slash = position;
+                            }
+
+                            // Tag End
+                            if (span[position] != '>')
+                            {
+                                continue;
+                            }
+
+                            if (end < 0)
+                            {
+                                end = position;
+                            }
+
+                            // Tag Name
+                            if (slash == start + 1)
+                            {
+                                if (previousEnd >= 0)
+                                {
+                                    var content = span.Slice(previousEnd + 1, start - previousEnd - 1);
+                                    //var trimmed = content.Trim();
+                                    //if (trimmed.Length > 0)
+                                    //{
+                                    //    Console.WriteLine($"'{content.ToString()}'");
+                                    //}
+                                }
+
+                                // </tag>
+                                var e = span.Slice(start + 2, end - start - 2);
+                                //var e = span.Slice(start, end - start + 1);
+                                level--;
+                                //Console.WriteLine($"[1] {new string(' ', level * 2)}'</{e.ToString()}>' {startLine}:{startColumn}");
+        
+                                previousEnd = position;
+                                break;
+                            }
+                            else if (slash == position - 1)
+                            {
+                                // <tag/>
+                                var e = span.Slice(start + 1, end - start - 1);
+                                //var e = span.Slice(start, end - start);
+                                //Console.WriteLine($"[2] {new string(' ', level * 2)}'<{e.ToString()}/>' {startLine}:{startColumn}");
+                                
+                                previousEnd = position;
+                                break;
+                            }
+                            else
+                            {
+                                // <tag>
+                                var e = span.Slice(start + 1, end - start - 1);
+                                //var e = span.Slice(start, end - start + 1);
+                                //Console.WriteLine($"[3] {new string(' ', level * 2)}'<{e.ToString()}>' {startLine}:{startColumn}");
+                                level++;
+                                
+                                previousEnd = position;
+                                break;
+                            }
+                        }
+                        break;
                     }
-                    else
+                    default:
                     {
-                        skipValueStart = position;
-                        skipValue = true;
-                        continue;
+                        column++;
+                        break;
                     }
                 }
-
-                if (span[position] == '/')
-                {
-                    slash = position;
-                }
-
-                // Whitespace
-                if (span[position] == ' ' || span[position] == '\t' || span[position] == '\n' || span[position] == '\r')
-                {
-                    lastWhitespace = position;
-                    if (end < 0)
-                    {
-                        end = position;
-                    }
-                    continue;
-                }
-
-                // Tag End
-                if (span[position] != '>')
-                {
-                    continue;
-                }
-
-                if (end < 0)
-                {
-                    end = position;
-                }
-
-                if (slash == start + 1)
-                {
-                    if (previousEnd >= 0)
-                    {
-                        var content = span.Slice(previousEnd + 1, start - previousEnd - 1);
-                        //var trimmed = content.Trim();
-                        //if (trimmed.Length > 0)
-                        //{
-                        //    Console.WriteLine($"'{content.ToString()}'");
-                        //}
-                    }
-
-                    // </tag>
-                    var e = span.Slice(start + 2, end - start - 2);
-                    //var e = span.Slice(start, end - start + 1);
-                    level--;
-                    //Console.WriteLine($"[1] {new string(' ', level * 2)}'</{e.ToString()}>' {startLine}:{startColumn}");
-                }
-                else if (slash == position - 1)
-                {
-                    // <tag/>
-                    var e = span.Slice(start + 1, end - start - 1);
-                    //var e = span.Slice(start, end - start);
-                    //Console.WriteLine($"[2] {new string(' ', level * 2)}'<{e.ToString()}/>' {startLine}:{startColumn}");
-                }
-                else
-                {
-                    // <tag>
-                    var e = span.Slice(start + 1, end - start - 1);
-                    //var e = span.Slice(start, end - start + 1);
-                    //Console.WriteLine($"[3] {new string(' ', level * 2)}'<{e.ToString()}>' {startLine}:{startColumn}");
-                    level++;
-                }
-
-                previousEnd = position;
-
-                break;
             }
-            goto loop;
-end:
-            return;
         }
     }
 }
