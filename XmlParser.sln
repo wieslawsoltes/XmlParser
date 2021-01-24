@@ -8,6 +8,8 @@ Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "XmlParser.Sample", "XmlPars
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "XmlParser.Diagnostics", "XmlParser.Diagnostics\XmlParser.Diagnostics.csproj", "{0951ADCA-776B-4625-A00E-52888AD19DD2}"
 EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "XmlParser.UnitTests", "XmlParser.UnitTests\XmlParser.UnitTests.csproj", "{CA3EABF9-3810-4160-8F84-C11FE0F624DA}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
@@ -30,5 +32,9 @@ Global
 		{0951ADCA-776B-4625-A00E-52888AD19DD2}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{0951ADCA-776B-4625-A00E-52888AD19DD2}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{0951ADCA-776B-4625-A00E-52888AD19DD2}.Release|Any CPU.Build.0 = Release|Any CPU
+		{CA3EABF9-3810-4160-8F84-C11FE0F624DA}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{CA3EABF9-3810-4160-8F84-C11FE0F624DA}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{CA3EABF9-3810-4160-8F84-C11FE0F624DA}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{CA3EABF9-3810-4160-8F84-C11FE0F624DA}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 EndGlobal
