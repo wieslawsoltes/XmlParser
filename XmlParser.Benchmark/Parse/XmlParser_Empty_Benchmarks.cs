@@ -12,6 +12,17 @@ namespace XmlParser.Benchmark
             _xml = Util.ToString(Util.Open("Empty.svg"));
         }
 
+        [Benchmark]
+        public void AsSpan_ForLoop()
+        {
+            var span = _xml.AsSpan();
+
+            for (int position = 0; position < span.Length; position++)
+            {
+                var c = span[position];
+            }
+        }
+
         [Benchmark(Baseline = true)]
         public void XmlParser_Parse()
         {
