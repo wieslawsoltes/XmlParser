@@ -8,7 +8,7 @@ namespace XmlParser.Benchmark
 
         public static Stream Open(string name)
         {
-            return typeof(Program).Assembly.GetManifestResourceStream($"{Prefix}.{name}");
+            return typeof(Util).Assembly.GetManifestResourceStream($"{Prefix}.{name}");
         }
 
         public static string ToString(Stream stream)
