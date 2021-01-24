@@ -11,14 +11,14 @@ namespace XmlParser
     {
         public static void Parse(ReadOnlySpan<char> s, IXmlFactory? factory = null)
         {
-            var length = s.Length;
-            var i = 0;
-            var previousEnd = -1;
 #if DEBUG_ELEMENT_NAME
             var level = 0;
 #endif
+            var l = s.Length;
+            var i = 0;
+            var previousEnd = -1;
 
-            for (; i < length; i++)
+            for (; i < l; i++)
             {  
                 switch (s[i])
                 {
@@ -33,7 +33,7 @@ namespace XmlParser
                     // Tag Start
                     case '<':
                     {
-                        if (i + 1 >= length)
+                        if (i + 1 >= l)
                         {
                            break;
                         }
@@ -43,12 +43,12 @@ namespace XmlParser
                         var slash = -1;
                         var lastWhitespace = -1;
 
-                        for (i += 1; i < length; i++)
+                        for (i += 1; i < l; i++)
                         {
                             // Processing Instruction: <? ... ?>
                             if (s[i] == '?')
                             {
-                                for (i += 1; i < length; i++)
+                                for (i += 1; i < l; i++)
                                 {
                                     if (s[i] == '?' && s[i + 1] == '>')
                                     {
@@ -61,11 +61,11 @@ namespace XmlParser
                             }
 
                             // Comment: <!-- ... -->
-                            if (length >= i + 2 && s[i] == '!' && s[i + 1] == '-' && s[i + 2] == '-')
+                            if (l >= i + 2 && s[i] == '!' && s[i + 1] == '-' && s[i + 2] == '-')
                             {
                                 i += 2;
 
-                                for (i += 1; i < length; i++)
+                                for (i += 1; i < l; i++)
                                 {
                                     if (s[i] == '-' && s[i + 1] == '-' && s[i + 2] == '>')
                                     {
@@ -79,11 +79,11 @@ namespace XmlParser
                             }
 
                             // CDATA: <![CDATA[ ... ]]>
-                            if (length >= i + 7 && s[i] == '!' && s[i + 1] == '[' && s[i + 2] == 'C' && s[i + 3] == 'D' && s[i + 4] == 'A' && s[i + 5] == 'T' && s[i + 6] == 'A' && s[i + 7] == '[')
+                            if (l >= i + 7 && s[i] == '!' && s[i + 1] == '[' && s[i + 2] == 'C' && s[i + 3] == 'D' && s[i + 4] == 'A' && s[i + 5] == 'T' && s[i + 6] == 'A' && s[i + 7] == '[')
                             {
                                 i += 7;
 
-                                for (i += 1; i < length; i++)
+                                for (i += 1; i < l; i++)
                                 {
                                     if (s[i] == ']' && s[i + 1] == ']' && s[i + 2] == '>')
                                     {
@@ -97,11 +97,11 @@ namespace XmlParser
                             }
 
                             // DOCTYPE: <!DOCTYPE ... >
-                            if (length >= i + 7 && s[i] == '!' && s[i + 1] == 'D' && s[i + 2] == 'O' && s[i + 3] == 'C' && s[i + 4] == 'T' && s[i + 5] == 'Y' && s[i + 6] == 'P' && s[i + 7] == 'E')
+                            if (l >= i + 7 && s[i] == '!' && s[i + 1] == 'D' && s[i + 2] == 'O' && s[i + 3] == 'C' && s[i + 4] == 'T' && s[i + 5] == 'Y' && s[i + 6] == 'P' && s[i + 7] == 'E')
                             {
                                 i += 7;
 
-                                for (i += 1; i < length; i++)
+                                for (i += 1; i < l; i++)
                                 {
                                     if (s[i] == '>')
                                     {
@@ -120,7 +120,7 @@ namespace XmlParser
                                 var skipValueEndChar = s[i];
                                 var skipValueStart = i;
 
-                                for (i += 1; i < length; i++)
+                                for (i += 1; i < l; i++)
                                 {
                                     if (s[i] == skipValueEndChar)
                                     {
