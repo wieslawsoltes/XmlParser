@@ -6,9 +6,9 @@ using System.Text;
 
 namespace XmlParser.Sample
 {
-    internal static class Program
+    internal static class XmlElementWriter
     {
-        public static void Indent(StringBuilder sb, int level, string indent)
+        private static void Indent(StringBuilder sb, int level, string indent)
         {
             for (int i = 0; i < level; i++)
             {
@@ -16,7 +16,7 @@ namespace XmlParser.Sample
             }
         }
 
-        public static void Print(XmlElement element, StringBuilder sb, int level, string indent)
+        public static void Write(XmlElement element, StringBuilder sb, int level, string indent)
         {
             Indent(sb, level, indent);
             sb.Append($"<{element.ElementName}");
@@ -37,7 +37,7 @@ namespace XmlParser.Sample
                 {
                     foreach (var child in element.Children)
                     {
-                        Print(child, sb, level + 1, indent);
+                        Write(child, sb, level + 1, indent);
                     }
                 }
 
@@ -55,41 +55,13 @@ namespace XmlParser.Sample
                 sb.AppendLine("/>");
             }
         }
+    }
+
+    internal static class Program
+    {
 
         private static void Main(string[] args)
         {
-#if false
-            {
-                //var path = @"c:\DOWNLOADS\GitHub-Forks\WalletWasabi\WalletWasabi.Fluent\Views\NavBar\NavBar.axaml";
-                //var path = @"c:\DOWNLOADS\GitHub-Forks\SVG\Tests\W3CTestSuite\svg\__AJ_Digital_Camera.svg";
-                //var path = @"c:\DOWNLOADS\GitHub-Forks\SVG\Tests\W3CTestSuite\svg\__issue-134-01.svg";
-                //var path = @"c:\DOWNLOADS\GitHub-Forks\SVG\Tests\W3CTestSuite\svg\__tiger.svg";
-                //var path = @"c:\DOWNLOADS\GitHub-Forks\SVG\Tests\W3CTestSuite\svg\paths-data-02-t.svg";
-                var path = @"c:\DOWNLOADS\GitHub-Forks\SVG\Tests\W3CTestSuite\svg\struct-svg-03-f.svg";
-                //var path = @"c:\DOWNLOADS\GitHub-Forks\SVG\Tests\W3CTestSuite\svg\__issue-247-02.svg";
-                //var path = @"c:\DOWNLOADS\GitHub-Forks\SVG\Tests\W3CTestSuite\svg\render-elems-03-t.svg";
-
-                var svg = File.ReadAllText(path);
-                var factory = new XmlFactory();
-
-                var sw = Stopwatch.StartNew();
-
-                //XmlParser.Parse(svg.AsSpan(), factory);
-                XmlParser2.Parse(svg.AsSpan(), factory);
-
-                sw.Stop();
-                Console.WriteLine($"{sw.Elapsed.TotalMilliseconds}ms");
-
-                if (factory.GetRootElement() is XmlElement root)
-                {
-                    var sb = new StringBuilder();
-                    Print(root, sb, 0, "  ");
-                    Console.WriteLine(sb.ToString());
-                }
-
-                return;
-            }
-#endif
             if (args.Length == 1)
             {
                 var path = args[0];
@@ -99,21 +71,23 @@ namespace XmlParser.Sample
                 var factory = new XmlFactory();
 
                 //XmlParser.Parse(svg.AsSpan(), factory);
-
                 XmlParser2.Parse(svg.AsSpan(), factory);
 
                 //XmlParser.Parse(svg.AsSpan());
-
                 //XmlTextReaderParser.Parse(svg);
-                
+
                 sw.Stop();
                 Console.WriteLine($"{sw.Elapsed.TotalMilliseconds}ms");
+
+                if (factory.GetRootElement() is XmlElement root)
+                {
+                    var sb = new StringBuilder();
+                    XmlElementWriter.Write(root, sb, 0, "  ");
+                    Console.WriteLine(sb.ToString());
+                }
             }
             else if (args.Length == 2)
             {
-                // -d c:\DOWNLOADS\GitHub-Forks\SVG\Tests\W3CTestSuite\svg\
-                // -d c:\DOWNLOADS\GitHub-Forks\resvg-test-suite\svg\
-
                 if (args[0] != "-d")
                 {
                     return;
@@ -133,7 +107,6 @@ namespace XmlParser.Sample
                         var factory = new XmlFactory();
 
                         //XmlParser.Parse(svg.AsSpan(), factory);
-
                         XmlParser2.Parse(svg.AsSpan(), factory);
 
                         //XmlParser.Parse(svg.AsSpan());
