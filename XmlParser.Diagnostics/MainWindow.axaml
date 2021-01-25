@@ -12,19 +12,22 @@
         Width="1100" Height="650"
         Title="XmlParser Diagnostics">
     <Grid ColumnDefinitions="300,8,*" Background="Transparent" DragDrop.AllowDrop="True">
-        <TreeView Name="ItemsTreeView" Items="{Binding Items}" IsVisible="{Binding !!Items}" Grid.Column="0">
-            <TreeView.DataTemplates>
-                <TreeDataTemplate DataType="local:Item" ItemsSource="{Binding Root.Children}">
-                    <TextBlock Text="{Binding Name}"/>
-                </TreeDataTemplate>
-                <TreeDataTemplate DataType="xp:XmlElement" ItemsSource="{Binding Children}">
-                    <TextBlock Text="{Binding ElementName}"/>
-                </TreeDataTemplate>
-            </TreeView.DataTemplates>
-        </TreeView>
+        <Grid RowDefinitions="Auto,*" IsVisible="{Binding !!Items}" Grid.Column="0">
+            <Label Content="Files" Padding="8,4,8,4" FontWeight="Bold" IsVisible="{Binding Items.Count}" Grid.Row="0"/>
+            <TreeView Name="ItemsTreeView" Items="{Binding Items}" Grid.Row="1">
+                <TreeView.DataTemplates>
+                    <TreeDataTemplate DataType="local:Item" ItemsSource="{Binding Root.Children}">
+                        <TextBlock Text="{Binding Name}"/>
+                    </TreeDataTemplate>
+                    <TreeDataTemplate DataType="xp:XmlElement" ItemsSource="{Binding Children}">
+                        <TextBlock Text="{Binding ElementName}"/>
+                    </TreeDataTemplate>
+                </TreeView.DataTemplates>
+            </TreeView>
+        </Grid>
         <GridSplitter ResizeBehavior="PreviousAndNext" ResizeDirection="Columns" Background="Transparent" Width="8" Grid.Column="1"/>
         <Grid RowDefinitions="Auto,*,Auto,Auto" IsVisible="{Binding !!Items}" Grid.Column="2">
-            <Label Content="Attributes" IsVisible="{Binding !!#ItemsTreeView.SelectedItem}" Padding="8,4,8,4" Grid.Row="0"/>
+            <Label Content="Attributes" FontWeight="Medium" IsVisible="{Binding !!#ItemsTreeView.SelectedItem}" Padding="8,4,8,4" Grid.Row="0"/>
             <ListBox Items="{Binding #ItemsTreeView.SelectedItem, Converter={x:Static local:ItemConverters.AttributesConverter}}" 
                      Background="Transparent"
                      ScrollViewer.HorizontalScrollBarVisibility="Auto"
@@ -39,14 +42,14 @@
                 <ListBox.ItemTemplate>
                     <DataTemplate>
                         <StackPanel Orientation="Horizontal">
-                            <TextBlock Text="{Binding Key}" Padding="4,2,4,2" />
-                            <TextBlock Text="=" Padding="2" />
+                            <TextBlock Text="{Binding Key}" Opacity="0.6" Padding="4,2,4,2" />
+                            <TextBlock Text="=" Opacity="0.6" Padding="2" />
                             <TextBlock Text="{Binding Value}" Padding="4,2,4,2" />
                         </StackPanel>
                     </DataTemplate>
                 </ListBox.ItemTemplate>
             </ListBox>
-            <Label Content="Content" IsVisible="{Binding !!#ItemsTreeView.SelectedItem}" Padding="8,4,8,4" Grid.Row="2"/>
+            <Label Content="Content" FontWeight="Medium" IsVisible="{Binding !!#ItemsTreeView.SelectedItem}" Padding="8,4,8,4" Grid.Row="2"/>
             <TextBox Text="{Binding #ItemsTreeView.SelectedItem, Converter={x:Static local:ItemConverters.ContentConverter}, Mode=OneWay}"
                      BorderThickness="1"
                      BorderBrush="Transparent"
