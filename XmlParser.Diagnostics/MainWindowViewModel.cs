@@ -58,8 +58,7 @@ namespace XmlParser.Diagnostics
                 try
                 {
                     var factory = new XmlFactory();
-                    //XmlParser.Parse(svg.AsSpan(), factory);
-                    XmlParser2.Parse(svg.AsSpan(), factory);
+                    XmlParser.Parse(svg.AsSpan(), factory);
                     var item = new Item()
                     {
                         Name = Path.GetFileName(path),

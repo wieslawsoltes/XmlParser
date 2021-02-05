@@ -22,15 +22,6 @@ namespace XmlParser.UnitTests
         }
 
         [Fact]
-        public void XmlParser2_Parse()
-        {
-            for (int i = 0; i < 1_000; i++)
-            {
-                XmlParser2.Parse(_xml.AsSpan());
-            }
-        }
-
-        [Fact]
         public void XmlTextReader_Parse()
         {
             for (int i = 0; i < 1_000; i++)
