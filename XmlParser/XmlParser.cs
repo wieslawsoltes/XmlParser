@@ -1,279 +1,248 @@
 ﻿#nullable enable
+//#define DEBUG_ELEMENT_NAME
+//#define DEBUG_CONTENT
+//#define DEBUG_VALUE
+//#define DEBUG_ATTRIBUTE
 using System;
 
 namespace XmlParser
 {
     public static class XmlParser
     {
-        private const char LessThanSign = '<';
-        private const char GreaterThanSign = '>';
-        private const char Apostrophe = '\'';
-        private const char QuotationMark = '\"';
-        private const char Solidus = '/';
-        private const char QuestionMark = '?';
-        private const char ExclamationMark = '!';
-        private const char EqualsSign = '=';
-        private const char LeftSquareBracket = '[';
-        private const char RightSquareBracket = ']';
-        private static readonly char[] WhitespaceChars = new[] {' ', '\t', '\n', '\r'};
-        private static readonly char[] CommentStart = new[] {'<', '!', '-', '-'};
-        private static readonly char[] CommentEnd = new[] {'-', '-', '>'};
-        private static readonly char[] DoctypeStart = new[] {'<', '!', 'D', 'O', 'C', 'T', 'Y', 'P', 'E'};
-        private static readonly char[] DoctypeEnd = new[] {']', '>'};
-        private static readonly char[] CdataStart = new[] {'<', '!', '[', 'C', 'D', 'A', 'T', 'A', '['};
-        private static readonly char[] CdataEnd = new[] {']', ']', '>'};
-
-        public static void Parse(ReadOnlySpan<char> span, IXmlFactory? factory = null)
+        public static void Parse(ReadOnlySpan<char> s, IXmlFactory? factory = null)
         {
-            var whitespaceChars = WhitespaceChars.AsSpan();
+#if DEBUG_ELEMENT_NAME
+            var level = 0;
+#endif
+            var l = s.Length;
+            var i = 0;
+            var previousEnd = -1;
 
-            while (true)
-            {
-                // Next Tag
-
-                var startIndex = span.IndexOf(LessThanSign);
-                if (startIndex < 0)
+            for (; i < l; i++)
+            {  
+                switch (s[i])
                 {
-                    break;
-                }
-
-                if (span.Length < 1)
-                {
-                    break;
-                }
-
-                // Unsupported (processing instruction, comment, cdata etc.)
-
-                if (span.Length >= startIndex + 1 
-                    && (span[startIndex + 1] == QuestionMark || span[startIndex + 1] == ExclamationMark))
-                {
-                    // Comment
-
-                    var isComment = span.Length >= startIndex + 4 
-                                    && span[startIndex + 1] == CommentStart[1] 
-                                    && span[startIndex + 2] == CommentStart[2] 
-                                    && span[startIndex + 3] == CommentStart[3];
-                    if (isComment)
+                    // Whitespace
+                    case ' ':
+                    case '\t':
+                    case '\r':
+                    case '\n':
                     {
-                        var commentEnd = span.IndexOf(CommentEnd.AsSpan()) + 3;
-                        if (commentEnd < 0)
-                        {
-                            break;
-                        }
-
-                        span = span.Slice(commentEnd);
-                        if (span.Length <= 0)
-                        {
-                            break;
-                        }
                         continue;
                     }
-
-                    // Processing Instructions
-
-                    if (span[startIndex + 1] == QuestionMark)
+                    // Tag Start
+                    case '<':
                     {
-                        var endInstruction = span.IndexOf(GreaterThanSign);
-                        if (endInstruction < 0)
+                        if (i + 1 >= l)
                         {
-                            break;
+                           break;
                         }
 
-                        span = span.Slice(endInstruction + 1);
-                        if (span.Length <= 0)
+                        var start = i;
+                        var end = -1;
+                        var slash = -1;
+                        var lastWhitespace = -1;
+                        for (i += 1; i < l; i++)
                         {
-                            break;
-                        }
-                        continue;
-                    }
-
-                    // DOCTYPE
-                    
-                    var isDoctype = span.Length >= startIndex + 8 
-                                    && span[startIndex + 1] == DoctypeStart[1] 
-                                    && span[startIndex + 2] == DoctypeStart[2] 
-                                    && span[startIndex + 3] == DoctypeStart[3] 
-                                    && span[startIndex + 4] == DoctypeStart[4] 
-                                    && span[startIndex + 5] == DoctypeStart[5] 
-                                    && span[startIndex + 6] == DoctypeStart[6] 
-                                    && span[startIndex + 7] == DoctypeStart[7]
-                                    && span[startIndex + 8] == DoctypeStart[8];
-                    if (isDoctype)
-                    {
-                        var doctypeEnd = span.IndexOf(DoctypeEnd.AsSpan());
-                        if (doctypeEnd > 0)
-                        {
-                            span = span.Slice(doctypeEnd + DoctypeEnd.Length);
-                        }
-                        else
-                        {
-                            var doctypeEndGreaterThanSign = span.IndexOf(GreaterThanSign);
-                            span = span.Slice(doctypeEndGreaterThanSign + 1);
-                        }
-
-                        if (span.Length <= 0)
-                        {
-                            break;
-                        }
-                        continue;
-                    }
-
-                    // CDATA
-                    
-                    var isCdata = span.Length >= startIndex + 8
-                                  && span[startIndex + 1] == CdataStart[1] 
-                                  && span[startIndex + 2] == CdataStart[2] 
-                                  && span[startIndex + 3] == CdataStart[3] 
-                                  && span[startIndex + 4] == CdataStart[4] 
-                                  && span[startIndex + 5] == CdataStart[5] 
-                                  && span[startIndex + 6] == CdataStart[6] 
-                                  && span[startIndex + 7] == CdataStart[7]
-                                  && span[startIndex + 8] == CdataStart[8];
-                    if (isCdata)
-                    {
-                        var cdataEnd = span.IndexOf(CdataEnd.AsSpan());
-                        if (cdataEnd > 0)
-                        {
-                            span = span.Slice(cdataEnd + CdataEnd.Length);
-                        }
-                        else
-                        {
-                            break;
-                        }
-
-                        if (span.Length <= 0)
-                        {
-                            break;
-                        }
-                        continue;
-                    }
-
-                    throw new Exception("Not supported Xml content.");
-                }
-
-                // Element
-
-                span = span.Slice(startIndex + 1);
-
-                var nextWhiteSpaceIndex = span.IndexOfAny(whitespaceChars);
-                if (nextWhiteSpaceIndex <= 0)
-                {
-                    break;
-                }
-
-                var endIndex = span.IndexOf(GreaterThanSign);
-                if (endIndex < 0)
-                {
-                    break;
-                }
-
-                var isSelfEnd = (endIndex > 0 && span[endIndex - 1] == Solidus);
-                var isEnd = span[0] == Solidus;
-                var hasAttributes = nextWhiteSpaceIndex < endIndex;
-                var endOffset = isEnd && !isSelfEnd ? 1 : 0;
-                var elementEnd = hasAttributes ? 
-                                 nextWhiteSpaceIndex - endOffset 
-                                 : (nextWhiteSpaceIndex > endIndex ? endIndex - endOffset : nextWhiteSpaceIndex - endOffset - 1);
-
-                var elementName = span.Slice(endOffset, elementEnd);
-
-                if (!isEnd)
-                {
-                    factory?.PushElement(elementName);
-
-                    // Content
-
-                    var nextIndex = span.IndexOf(LessThanSign);
-                    if (nextIndex > 0)
-                    {
-                        var contentStart = endIndex + 1;
-                        var contentLength = nextIndex - endIndex - 1;
-                        var content = span.Slice(contentStart, contentLength).Trim();
-                        if (content.Length > 0)
-                        {
-                            factory?.AddElementContent(content);
-                        }
-                    }
-                }
-
-                if (isEnd || isSelfEnd)
-                {
-                    try
-                    {
-                        factory?.PopElement();
-                    }
-                    catch (Exception e)
-                    {
-                        Console.WriteLine(e);
-                        throw;
-                    }
-                }
-
-                // Attributes
-
-                if (hasAttributes)
-                {
-                    var attributesStart = nextWhiteSpaceIndex;
-                    var attributesLength = endIndex - nextWhiteSpaceIndex;
-                    var attributes = span.Slice(attributesStart, attributesLength);
-
-                    while (true)
-                    {
-                        var attributeSplitIndex = attributes.IndexOf(EqualsSign);
-                        if (attributeSplitIndex < 0)
-                        {
-                            break;
-                        }
-
-                        var attributeKey = attributes.Slice(0, attributeSplitIndex);
-
-                        attributes = attributes.Slice(attributeSplitIndex + 1);
-                        var attributeStartValueIndex1 = attributes.IndexOf(QuotationMark);
-                        var attributeStartValueIndex2 = attributes.IndexOf(Apostrophe);
-                        if (attributeStartValueIndex1 < 0 && attributeStartValueIndex2 < 0)
-                        {
-                            break;
-                        }
-                        attributes = attributes.Slice(attributeStartValueIndex1 >= 0 ? attributeStartValueIndex1 + 1 : attributeStartValueIndex2 + 1);
-                        var attributeEndValueIndex1 = attributes.IndexOf(QuotationMark);
-                        var attributeEndValueIndex2 = attributes.IndexOf(Apostrophe);
-                        if (attributeEndValueIndex1 < 0 && attributeEndValueIndex2 < 0)
-                        {
-                            break;
-                        }
-                        var attributeValue = attributes.Slice(0, attributeEndValueIndex1 >= 0 ? attributeEndValueIndex1 : attributeEndValueIndex2);
-
-                        // Filter Attributes
-#if false
-                        if (elementName.SequenceEqual("path".AsSpan()))
-                        {
-                            if (attributeKey.Trim().SequenceEqual("d".AsSpan()))
+                            // Processing Instruction: <? ... ?>
+                            if (s[i] == '?')
                             {
-                                Console.WriteLine($"d={attributeValue.ToString()}");
+                                for (i += 1; i < l; i++)
+                                {
+                                    if (s[i] == '?' && s[i + 1] == '>')
+                                    {
+                                        i += 2;
+                                        previousEnd = i;
+                                        break;
+                                    }
+                                }
+                                break;
+                            }
+
+                            // Comment: <!-- ... -->
+                            if (l >= i + 2 && s[i] == '!' && s[i + 1] == '-' && s[i + 2] == '-')
+                            {
+                                i += 2;
+
+                                for (i += 1; i < l; i++)
+                                {
+                                    if (s[i] == '-' && s[i + 1] == '-' && s[i + 2] == '>')
+                                    {
+                                        i += 3;
+                                        previousEnd = i;
+                                        break;
+                                    }
+                                }
+
+                                break;
+                            }
+
+                            // CDATA: <![CDATA[ ... ]]>
+                            if (l >= i + 7 && s[i] == '!' && s[i + 1] == '[' && s[i + 2] == 'C' && s[i + 3] == 'D' && s[i + 4] == 'A' && s[i + 5] == 'T' && s[i + 6] == 'A' && s[i + 7] == '[')
+                            {
+                                i += 7;
+
+                                for (i += 1; i < l; i++)
+                                {
+                                    if (s[i] == ']' && s[i + 1] == ']' && s[i + 2] == '>')
+                                    {
+                                        i += 3;
+                                        previousEnd = i;
+                                        break;
+                                    }
+                                }
+
+                                break;
+                            }
+
+                            // DOCTYPE: <!DOCTYPE ... >
+                            if (l >= i + 7 && s[i] == '!' && s[i + 1] == 'D' && s[i + 2] == 'O' && s[i + 3] == 'C' && s[i + 4] == 'T' && s[i + 5] == 'Y' && s[i + 6] == 'P' && s[i + 7] == 'E')
+                            {
+                                i += 7;
+
+                                for (i += 1; i < l; i++)
+                                {
+                                    if (s[i] == '>')
+                                    {
+                                        i += 1;
+                                        previousEnd = i;
+                                        break;
+                                    }
+                                }
+
+                                break;
+                            }            
+
+                            if (i - 1 == start && s[i] != '/')
+                            {
+                                factory?.PushElement();
+                            }
+
+                            // Value: '...' or "..."
+                            if (s[i] == '\"' || s[i] == '\'')
+                            {
+                                var skipValueEndChar = s[i];
+                                var skipValueStart = i;
+
+                                for (i += 1; i < l; i++)
+                                {
+                                    if (s[i] == skipValueEndChar)
+                                    {
+                                        break;
+                                    }
+                                }
+
+                                var value = s.Slice(skipValueStart + 1, i - skipValueStart - 1);
+#if DEBUG_VALUE
+                                Console.WriteLine($"'{value.ToString()}'");
+#endif
+                                // Attribute
+                                if (lastWhitespace >= 0 && s[skipValueStart - 1] == '=')
+                                {
+                                    var key = s.Slice(lastWhitespace + 1, skipValueStart - lastWhitespace - 2);
+                                    factory?.AddElementAttribute(key, value);
+#if DEBUG_ATTRIBUTE
+                                    Console.WriteLine($"'{key.ToString()}'='{value.ToString()}'");
+#endif
+                                }
+
+                                continue;
+                            }
+
+                            switch (s[i])
+                            {
+                                // Whitespace
+                                case ' ':
+                                case '\t':
+                                case '\n':
+                                case '\r':
+                                {
+                                    lastWhitespace = i;
+                                    if (end < 0)
+                                    {
+                                        end = i;
+                                    }
+                                    continue;
+                                }
+                                // Tag Slash
+                                case '/':
+                                {
+                                    slash = i;
+                                    continue;
+                                }
+                                // Tag End
+                                case '>':
+                                {
+                                    break;
+                                }
+                                // Skip
+                                default:
+                                {
+                                    continue;
+                                }
+                            }
+
+                            if (end < 0)
+                            {
+                                end = i;
+                            }
+
+                            // Tag Name
+                            if (slash == start + 1)
+                            {
+                                // </tag>
+                                var e = s.Slice(start + 2, end - start - 2);
+                                factory?.PopElement();
+                                factory?.SetElementName(e);
+#if DEBUG_ELEMENT_NAME
+                                level--;
+                                Console.WriteLine($"[1] {new string(' ', level * 2)}'</{e.ToString()}>'");
+#endif
+                                if (previousEnd >= 0)
+                                {
+                                    var content = s.Slice(previousEnd + 1, start - previousEnd - 1);
+                                    var trimmed = content.Trim();
+                                    if (trimmed.Length > 0)
+                                    {
+                                        factory?.AddElementContent(trimmed);
+#if DEBUG_CONTENT
+                                        Console.WriteLine($"'{content.ToString()}'");
+#endif
+                                    }
+
+                                }
+                                previousEnd = i;
+                                break;
+                            }
+                            else if (slash == i - 1)
+                            {
+                                // <tag/>
+                                var e = s.Slice(start + 1, end - start - 1);
+                                factory?.SetElementName(e);
+                                factory?.PopElement();
+#if DEBUG_ELEMENT_NAME
+                                Console.WriteLine($"[2] {new string(' ', level * 2)}'<{e.ToString()}/>'"); 
+#endif
+                                previousEnd = i;
+                                break;
+                            }
+                            else
+                            {
+                                // <tag>
+                                var e = s.Slice(start + 1, end - start - 1);
+                                factory?.SetElementName(e);
+#if DEBUG_ELEMENT_NAME
+                                Console.WriteLine($"[3] {new string(' ', level * 2)}'<{e.ToString()}>'");
+                                level++;
+#endif
+                                previousEnd = i;
+                                break;
                             }
                         }
-#endif
-                        factory?.AddElementAttribute(attributeKey.Trim().ToString(), attributeValue.ToString());
-
-                        attributes = attributes.Slice(attributeEndValueIndex1 >= 0 ? attributeEndValueIndex1 + 1 : attributeEndValueIndex2 + 1);
-                    }
-
-                    span = span.Slice(endIndex + 1);
-                    if (span.Length == 0)
-                    {
-                        break;
-                    }
-                }
-                else
-                {
-                    var nextTagEndIndex = span.IndexOf(GreaterThanSign);
-                    span = span.Slice(nextTagEndIndex + 1);
-                    if (span.Length == 0)
-                    {
                         break;
                     }
                 }
             }
-        }   
+        }
     }
 }

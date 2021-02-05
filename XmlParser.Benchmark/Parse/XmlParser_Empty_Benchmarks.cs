@@ -30,12 +30,6 @@ namespace XmlParser.Benchmark
         }
 
         [Benchmark]
-        public void XmlParser2_Parse()
-        {
-            XmlParser2.Parse(_xml.AsSpan());
-        }
-
-        [Benchmark]
         public void XmlTextReader_Parse()
         {
             XmlTextReaderParser.Parse(_xml);

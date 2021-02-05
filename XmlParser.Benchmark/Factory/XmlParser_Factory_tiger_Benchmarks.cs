@@ -20,13 +20,6 @@ namespace XmlParser.Benchmark
         }
 
         [Benchmark]
-        public void XmlParser2_Parse_Factory()
-        {
-            var factory = new XmlFactory();
-            XmlParser2.Parse(_xml.AsSpan(), factory);
-        }
-
-        [Benchmark]
         public void XmlTextReader_Parse_Factory()
         {
             var factory = new XmlFactory();
